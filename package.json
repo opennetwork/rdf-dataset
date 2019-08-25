@@ -1,6 +1,6 @@
 {
   "name": "@opennetwork/rdf-dataset",
-  "version": "5.0.0",
+  "version": "6.2.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "license": "MIT",
@@ -11,6 +11,7 @@
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
+    "@opennetwork/dataset": "^4.1.0",
     "@opennetwork/rdf-data-model": "^4.0.0"
   },
   "dependencies": {
@@ -21,6 +22,7 @@
     "url": "https://github.com/opennetwork/rdf-dataset.git"
   },
   "devDependencies": {
+    "@opennetwork/dataset": "^4.1.0",
     "@opennetwork/rdf-data-model": "^4.0.0",
     "esm": "^3.2.25",
     "tslint": "^5.19.0",

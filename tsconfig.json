@@ -2,10 +2,10 @@
     "compilerOptions": {
         "module": "es6",
         "lib": [
-            "es2018"
+            "es2018",
+            "esnext"
         ],
         "types": [
-
         ],
         "esModuleInterop": true,
         "target": "es6",
