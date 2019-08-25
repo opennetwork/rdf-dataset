@@ -21,6 +21,7 @@
     "url": "https://github.com/opennetwork/rdf-dataset.git"
   },
   "devDependencies": {
+    "@opennetwork/dataset": "^1.0.1",
     "@opennetwork/rdf-data-model": "^4.0.0",
     "esm": "^3.2.25",
     "tslint": "^5.19.0",
