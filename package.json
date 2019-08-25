@@ -11,6 +11,7 @@
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
+    "@opennetwork/dataset": "^1.0.1",
     "@opennetwork/rdf-data-model": "^4.0.0"
   },
   "dependencies": {
