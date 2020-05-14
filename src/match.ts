@@ -1,5 +1,5 @@
-import { QuadLike, TermLike, DefaultDataFactory, isQuad } from "@opennetwork/rdf-data-model";
-
+import { QuadLike, TermLike, DefaultDataFactory, isQuad, isQuadLike, isTermLike } from "@opennetwork/rdf-data-model";
+import { hasKey } from "@opennetwork/rdf-data-model/src/has-key";
 
 export declare type QuadFind = Partial<QuadLike | {
   subject: TermLike;
@@ -7,6 +7,28 @@ export declare type QuadFind = Partial<QuadLike | {
   object: TermLike;
   graph: TermLike;
 }>;
+
+export function isQuadFind(value: unknown): value is QuadFind {
+  return (
+    isQuadLike(value) ||
+    (
+      hasKey(value, "subject") &&
+      isTermLike(value)
+    ) ||
+    (
+      hasKey(value, "predicate") &&
+      isTermLike(value)
+    ) ||
+    (
+      hasKey(value, "object") &&
+      isTermLike(value)
+    ) ||
+    (
+      hasKey(value, "graph") &&
+      isTermLike(value)
+    )
+  );
+}
 
 export function isSingleMatcher(find: QuadFind): boolean {
   return !!(

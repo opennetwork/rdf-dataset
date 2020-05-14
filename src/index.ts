@@ -1,14 +1,22 @@
-import { dataFactory, asyncDataFactory } from "@opennetwork/dataset";
-import { isMatch } from "./match";
-import { isQuad, isQuadLike, DefaultDataFactory } from "@opennetwork/rdf-data-model";
+import { lazySetFactory, LazySetContext, AsyncIterableLike } from "@opennetwork/lazy-set";
+import { isMatch, isQuadFind, QuadFind } from "./match";
+import { isQuad, isQuadLike, DefaultDataFactory, Quad, QuadLike } from "@opennetwork/rdf-data-model";
 
-const quadDatasetFactoryOptions = {
+const quadDatasetFactoryOptions: LazySetContext<Quad, QuadLike | Quad, QuadFind> = {
   isMatch,
+  isFind: isQuadFind,
   is: isQuad,
-  isLike: isQuadLike,
+  isCreate: isQuadLike,
   create: DefaultDataFactory.fromQuad
 };
 
-export const DatasetFactory = dataFactory(quadDatasetFactoryOptions);
-export const AsyncDatasetFactory = asyncDataFactory(quadDatasetFactoryOptions);
+const factory = lazySetFactory(quadDatasetFactoryOptions);
+
+export function dataset(sequence: Iterable<Quad | QuadLike>) {
+  return factory.lazySet(sequence);
+}
+
+export function asyncDataset(sequence: AsyncIterableLike<Quad | QuadLike>) {
+  return factory.asyncLazySet(sequence);
+}
 
