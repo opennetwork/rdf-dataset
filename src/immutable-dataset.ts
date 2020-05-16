@@ -4,14 +4,19 @@ import {
   Quad,
   QuadLike
 } from "@opennetwork/rdf-data-model"
-import {
-  QuadGraphLike,
-  QuadObjectLike,
-  QuadPredicateLike,
-  QuadSubjectLike
-} from "@opennetwork/rdf-data-model/esnext/quad";
-import { Dataset } from "./dataset";
-import { QuadFind } from "./match";
+import { Dataset } from "./dataset"
+import { QuadFind } from "./match"
+
+export interface ImmutableDataset extends Dataset {
+
+}
+
+export interface ImmutableDataset {
+  add(value: Quad | QuadLike): ImmutableDataset
+  addAll(dataset: Iterable<Quad | QuadLike>): ImmutableDataset
+  import(dataset: AsyncIterable<Quad | QuadLike>): Promise<ImmutableDataset>
+  delete(quad: Quad | QuadLike | QuadFind): ImmutableDataset
+}
 
 export class ImmutableDataset extends Dataset {
 
