@@ -75,7 +75,7 @@ export class ReadonlyDataset implements ReadonlyDataset, Iterable<Quad> {
   }
 
   has(find: Quad | QuadFind): boolean {
-    return !!this.match(find).size
+    return !this.match(find).empty
   }
 
   contains(dataset: Iterable<Quad | QuadLike>): boolean {
@@ -91,7 +91,7 @@ export class ReadonlyDataset implements ReadonlyDataset, Iterable<Quad> {
   }
 
   every(iteratee: FilterIterateeFn<Quad>): boolean {
-    return !this.except(iteratee).size
+    return this.except(iteratee).empty
   }
 
   forEach(iteratee: RunIteratee<Quad>): void {
@@ -122,7 +122,7 @@ export class ReadonlyDataset implements ReadonlyDataset, Iterable<Quad> {
   }
 
   some(iteratee: FilterIterateeFn<Quad>): boolean {
-    return !!this.filter(iteratee).size
+    return !this.filter(iteratee).empty
   }
 
   toArray(): Quad[] {
@@ -163,5 +163,12 @@ export class ReadonlyDataset implements ReadonlyDataset, Iterable<Quad> {
       next = iterator.next()
     } while (!next.done)
     return size
+  }
+
+  get empty() {
+    const iterator = this[Symbol.iterator]()
+    const next = iterator.next()
+    iterator.return()
+    return next.done
   }
 }
