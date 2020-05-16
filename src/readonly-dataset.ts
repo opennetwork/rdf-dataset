@@ -1,6 +1,5 @@
-import { DefaultDataFactory, isQuad, isQuadLike, Quad, QuadLike } from "@opennetwork/rdf-data-model";
-import { isMatch, QuadFind } from "./match";
-import { type } from "os";
+import { DefaultDataFactory, isQuad, isQuadLike, Quad, QuadLike } from "@opennetwork/rdf-data-model"
+import { isMatch, QuadFind } from "./match"
 
 export interface FilterIterateeFn<T> {
   (value: T): boolean
