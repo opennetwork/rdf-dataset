@@ -1,5 +1,8 @@
 import { DefaultDataFactory, isQuad, isQuadLike, isTermLike } from "@opennetwork/rdf-data-model";
-import { hasKey } from "@opennetwork/rdf-data-model/src/has-key";
+function hasKey(value, key) {
+    return (typeof value === "object" &&
+        value.hasOwnProperty(key));
+}
 export function isQuadFind(value) {
     return (isQuadLike(value) ||
         (hasKey(value, "subject") &&
