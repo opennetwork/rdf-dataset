@@ -30,7 +30,6 @@ addEventListener("execute", async () => {
     predicate: DefaultDataFactory.namedNode("http://xmlns.com/foaf/0.1/name")
   })
 
-  // _:art <http://xmlns.com/foaf/0.1/name> "Art Barstow"
   context.store.add(DefaultDataFactory.fromQuad({
     subject: DefaultDataFactory.blankNode("_:art"),
     predicate: DefaultDataFactory.namedNode("http://xmlns.com/foaf/0.1/name"),
@@ -38,16 +37,23 @@ addEventListener("execute", async () => {
     graph: DefaultDataFactory.defaultGraph()
   }))
 
-  console.log(artMatcher.size)
+  context.store.add(DefaultDataFactory.fromQuad({
+    subject: DefaultDataFactory.blankNode("_:smart"),
+    predicate: DefaultDataFactory.namedNode("http://xmlns.com/foaf/0.1/name"),
+    object: DefaultDataFactory.literal(`"Smart"@en`),
+    graph: DefaultDataFactory.defaultGraph()
+  }))
+
+  console.log(artMatcher.size, context.store.size)
 
   context.store.add(DefaultDataFactory.fromQuad({
     subject: DefaultDataFactory.blankNode("_:art"),
     predicate: DefaultDataFactory.namedNode("http://xmlns.com/foaf/0.1/name"),
-    object: DefaultDataFactory.literal(`"ArtBB"@en`),
+    object: DefaultDataFactory.literal(`"ArtB"@en`),
     graph: DefaultDataFactory.defaultGraph()
   }))
 
-  console.log(artMatcher.size)
+  console.log(artMatcher.size, context.store.size)
 
   context.store.add(DefaultDataFactory.fromQuad({
     subject: DefaultDataFactory.blankNode("_:art"),
@@ -56,7 +62,7 @@ addEventListener("execute", async () => {
     graph: DefaultDataFactory.defaultGraph()
   }))
 
-  console.log(artMatcher.size)
+  console.log(artMatcher.size, context.store.size)
 
   console.log(context.store.toArray())
 
