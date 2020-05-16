@@ -56,4 +56,8 @@ export class Dataset extends ReadonlyDataset {
     return this
   }
 
+  get size() {
+    return this.#set.size
+  }
+
 }
