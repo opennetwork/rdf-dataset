@@ -8,7 +8,7 @@ export interface InsertLike<T> extends Iterable<T> {
   length: number
 }
 
-export function getSetLikeFromInsertLike<T, R>(insert: InsertLike<T>, toFn: (value: T) => R, fromFn: (value: R) => T, equals: (left: T, right: T) => boolean): SetLike<R> {
+export function getSetLikeFromInsertLike<T, R>(insert: InsertLike<T>, isLike: (value: T) => boolean, toFn: (value: T) => R, fromFn: (value: R) => T, equals: (left: T, right: T) => boolean): SetLike<R> {
   function getIndex(match: T): number {
     if (insert.indexOf) {
       return insert.indexOf(match)
@@ -41,7 +41,9 @@ export function getSetLikeFromInsertLike<T, R>(insert: InsertLike<T>, toFn: (val
     },
     *[Symbol.iterator]() {
       for (const value of insert) {
-        yield toFn(value)
+        if (isLike(value)) {
+          yield toFn(value)
+        }
       }
     }
   }
