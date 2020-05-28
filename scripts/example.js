@@ -41,7 +41,7 @@ dataset.add({
 console.log({ a: aMatcher.size, total: dataset.size })
 console.log({ aObjects: aMatcher.toArray().map(({ object }) => object) })
 
-const { Array: YArray, Map: YMap, Doc: YDoc } = Y
+const { Doc: YDoc } = Y
 
 const doc = new YDoc()
 const array = doc.getArray("set")
