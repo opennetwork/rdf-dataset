@@ -6,6 +6,7 @@ import {
 } from "@opennetwork/rdf-data-model"
 import { ReadonlyDataset } from "./readonly-dataset"
 import { QuadFind } from "./match"
+import { SetLike } from "./set-like"
 
 export interface Dataset extends ReadonlyDataset {
 
@@ -17,19 +18,18 @@ export interface Dataset {
   import(dataset: AsyncIterable<Quad | QuadLike>): Promise<unknown>
   delete(quad: Quad | QuadLike | QuadFind): Dataset
 }
-
 export class Dataset extends ReadonlyDataset {
 
-  readonly #set: Set<Quad>
+  readonly #set: SetLike<Quad>
 
-  constructor(set: Set<Quad> = new Set()) {
+  constructor(set: SetLike<Quad> = new Set()) {
     super(set)
     this.#set = set
   }
 
   add(value: Quad | QuadLike): Dataset {
     const quad = isQuad(value) ? value : DefaultDataFactory.fromQuad(value)
-    if (this.has(quad)) {
+    if (this.#set.has ? this.#set.has(quad) : this.has(quad)) {
       return this
     }
     this.#set.add(quad)

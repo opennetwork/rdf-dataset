@@ -6,6 +6,7 @@ import {
 } from "@opennetwork/rdf-data-model"
 import { Dataset } from "./dataset"
 import { QuadFind } from "./match"
+import { SetLike } from "./set-like"
 
 export interface ImmutableDataset extends Dataset {
 
@@ -20,9 +21,9 @@ export interface ImmutableDataset {
 
 export class ImmutableDataset extends Dataset {
 
-  readonly #set: Set<Quad>
+  readonly #set: SetLike<Quad>
 
-  constructor(set: Set<Quad> = new Set()) {
+  constructor(set: SetLike<Quad> = new Set()) {
     super(set)
     this.#set = set
   }
@@ -32,11 +33,11 @@ export class ImmutableDataset extends Dataset {
   }
 
   addAll(dataset: Iterable<Quad | QuadLike>): ImmutableDataset {
-    return new ImmutableDataset(new Set(this.union(dataset)))
+    return new ImmutableDataset(this.constructSet(this.union(dataset)))
   }
 
   async import(dataset: AsyncIterable<Quad | QuadLike>, eager?: boolean): Promise<ImmutableDataset> {
-    const next = new Set(this.#set)
+    const next =this.constructSet(this.#set)
     for await (const value of dataset) {
       next.add(isQuad(value) ? value : DefaultDataFactory.fromQuad(value))
     }
@@ -44,7 +45,15 @@ export class ImmutableDataset extends Dataset {
   }
 
   delete(quad: Quad | QuadLike | QuadFind) {
-    return new ImmutableDataset(new Set(this.without(quad)))
+    return new ImmutableDataset(this.constructSet(this.without(quad)))
+  }
+
+  private constructSet(initial?: Iterable<Quad>) {
+    if (this.#set.construct) {
+      return this.#set.construct(initial)
+    } else {
+      return new Set(initial)
+    }
   }
 
 }
