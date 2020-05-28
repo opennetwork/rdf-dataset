@@ -46,10 +46,10 @@
   resolved "https://registry.npmjs.org/@opennetwork/http-representation/-/http-representation-3.0.0.tgz#5665ee2a5900dc53cff207aef491144bed0ce32f"
   integrity sha512-g3davRpiR4m9vMhEtocjiENRBgJRnzNd9tWmO2b9E0z9Je5iVmMuzLvTqdP0p+Ew9RIbIEaC+ayEalIkLVgKOQ==
 
-"@opennetwork/rdf-data-model@^5.1.3":
-  version "5.1.3"
-  resolved "https://registry.npmjs.org/@opennetwork/rdf-data-model/-/rdf-data-model-5.1.3.tgz#737409cd84c9a1086d4f5ab46509bebe700a8ab7"
-  integrity sha512-LO7jKbGMgEDNjJ9E1pgLfk5X0Xz7q1PtuaAUq/LaaFOqG/lNTPIf/mq7L11gVuAp8kQbWzaW/AY03QmtOdSsnA==
+"@opennetwork/rdf-data-model@^5.3.0":
+  version "5.3.0"
+  resolved "https://registry.npmjs.org/@opennetwork/rdf-data-model/-/rdf-data-model-5.3.0.tgz#0c32168bd75246e13d551c23412ec2bdcaead566"
+  integrity sha512-hLgi3RCzyVwhsfNQ4Pqmmx/Z9fINnFGCHYqwpubHFEZKsQzZbJV6CqIwllgz8N9WIf+oOX7hz4Y18+Y2O5wDbA==
   dependencies:
     pure-uuid "^1.6.0"
 
@@ -251,6 +251,11 @@ inherits@2:
   resolved "https://registry.npmjs.org/inherits/-/inherits-2.0.4.tgz#0fa2c64f932917c3433a0ded55363aae37416b7c"
   integrity sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==
 
+isomorphic.js@^0.1.3:
+  version "0.1.3"
+  resolved "https://registry.npmjs.org/isomorphic.js/-/isomorphic.js-0.1.3.tgz#b2956e14be3bc10efb5fe80e6b5bebc16e1deeca"
+  integrity sha512-pabBRLDwYefSsNS+qCazJ97o7P5xDTrNoxSYFTM09JlZTxPrOEPGKekwqUy3/Np4C4PHnVUXHYsZPOix0jELsA==
+
 iterable@^5.7.0:
   version "5.7.0"
   resolved "https://registry.npmjs.org/iterable/-/iterable-5.7.0.tgz#6937296d3380c227f55fd5ca299e41a821d573f7"
@@ -268,6 +273,13 @@ js-yaml@^3.13.1:
   dependencies:
     argparse "^1.0.7"
     esprima "^4.0.0"
+
+lib0@^0.2.26:
+  version "0.2.26"
+  resolved "https://registry.npmjs.org/lib0/-/lib0-0.2.26.tgz#2a016b2c13b40b08a81351fe47d2f371ab44b63a"
+  integrity sha512-DTf0VmFNi/eT+3Q+6rNHYdIAx69ROpvQkpnplpDoErW8NeRwjPwoIKjCF3rKebsMrQoxH4tFD1bvMQb4CUzcFg==
+  dependencies:
+    isomorphic.js "^0.1.3"
 
 lit-html@^1.2.1:
   version "1.2.1"
@@ -421,3 +433,10 @@ wrappy@1:
   version "1.0.2"
   resolved "https://registry.npmjs.org/wrappy/-/wrappy-1.0.2.tgz#b5243d8f3ec1aa35f1364605bc0d1036e30ab69f"
   integrity sha1-tSQ9jz7BqjXxNkYFvA0QNuMKtp8=
+
+yjs@^13.0.8:
+  version "13.0.8"
+  resolved "https://registry.npmjs.org/yjs/-/yjs-13.0.8.tgz#d78b322c018d9256d4d48c616f63689896c16a95"
+  integrity sha512-5jqQOnYgMQ5XpZElxdSAUPeNEHZIvP2PS3jClw0Gfnrn6Pp87Qpu4grnjH++dV1NkyBX8pc59sPqSyGt3UXmNw==
+  dependencies:
+    lib0 "^0.2.26"
