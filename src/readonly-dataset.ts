@@ -5,6 +5,10 @@ export interface FilterIterateeFn<T> {
   (value: T): boolean
 }
 
+export interface FilterIterateeIsFn<T, R extends T = T> {
+  (value: T): value is R
+}
+
 export interface RunIteratee<T> {
   (value: T): void
 }
@@ -13,37 +17,51 @@ export interface MapIteratee<T, R> {
   (value: T): R
 }
 
-export interface ReadonlyDataset extends Iterable<Quad> {
+export interface ReadonlyDataset<Q extends Quad = Quad> extends Iterable<Q> {
 
 }
 
-export interface ReadonlyDataset {
-  filter(iteratee: FilterIterateeFn<Quad>): ReadonlyDataset
-  except(iteratee: FilterIterateeFn<Quad>): ReadonlyDataset
-  match(find: Quad | QuadFind): ReadonlyDataset
-  without(find: Quad | QuadFind): ReadonlyDataset
+export interface ReadonlyDataset<Q extends Quad = Quad> {
+  filter(iteratee: FilterIterateeFn<Q>): ReadonlyDataset<Q>
+  filter<R extends Q = Q>(iteratee: FilterIterateeIsFn<Q, R>): ReadonlyDataset<R>
+  except(iteratee: FilterIterateeFn<Q>): ReadonlyDataset<Q>
+  match(find: Quad | QuadFind): ReadonlyDataset<Q>
+  match<R extends Q = Q>(find: R): ReadonlyDataset<R>
+  match<R extends Partial<Q> = Q>(find: R): ReadonlyDataset<Q & R>
+  without(find: Quad | QuadFind): ReadonlyDataset<Q>
   has(find: Quad | QuadFind): boolean
   contains(dataset: Iterable<Quad | QuadLike>): boolean
   difference(dataset: Iterable<Quad | QuadLike>): ReadonlyDataset
   equals(dataset: Iterable<Quad | QuadLike>): boolean
-  every(iteratee: FilterIterateeFn<Quad>): boolean
-  forEach(iteratee: RunIteratee<Quad>): void
+  every(iteratee: FilterIterateeFn<Q>): boolean
+  forEach(iteratee: RunIteratee<Q>): void
   intersection(dataset: Iterable<Quad | QuadLike>): ReadonlyDataset
-  map(iteratee: MapIteratee<Quad, QuadLike>): ReadonlyDataset
-  some(iteratee: FilterIterateeFn<Quad>): boolean
-  toArray(): Quad[]
+  map(iteratee: MapIteratee<Q, QuadLike>): ReadonlyDataset
+  some(iteratee: FilterIterateeFn<Q>): boolean
+  toArray(): Q[]
   union(dataset: Iterable<Quad | QuadLike>): ReadonlyDataset
 }
 
-export class ReadonlyDataset implements ReadonlyDataset, Iterable<Quad> {
+function *quads(quads: Iterable<Quad | QuadLike>): Iterable<Quad> {
+  for (const quad of quads) {
+    if (isQuad(quad)) {
+      yield quad
+    } else {
+      yield DefaultDataFactory.fromQuad(quad)
+    }
+  }
+}
 
-  readonly #source: Iterable<Quad | QuadLike> | undefined
+export class ReadonlyDataset<Q extends Quad = Quad> implements ReadonlyDataset<Q>, Iterable<Q> {
 
-  constructor(source?: Iterable<Quad | QuadLike>) {
+  readonly #source: Iterable<Q> | undefined
+
+  constructor(source?: Iterable<Q>) {
     this.#source = source
   }
 
-  filter(iteratee: FilterIterateeFn<Quad>): ReadonlyDataset {
+  filter(iteratee: FilterIterateeFn<Q>): ReadonlyDataset<Q>
+  filter<R extends Q = Q>(iteratee: FilterIterateeIsFn<Q, R>): ReadonlyDataset<R> {
     return new ReadonlyDataset({
       [Symbol.iterator]: filter.bind(this)
     })
@@ -56,7 +74,7 @@ export class ReadonlyDataset implements ReadonlyDataset, Iterable<Quad> {
     }
   }
 
-  except(iteratee: FilterIterateeFn<Quad>): ReadonlyDataset {
+  except(iteratee: FilterIterateeFn<Q>): ReadonlyDataset<Q> {
     return new ReadonlyDataset({
       [Symbol.iterator]: except.bind(this)
     })
@@ -69,8 +87,10 @@ export class ReadonlyDataset implements ReadonlyDataset, Iterable<Quad> {
     }
   }
 
-  match(find: Quad | QuadFind): ReadonlyDataset {
-    return this.filter(quad => isMatch(quad, find))
+  match<R extends Q = Q>(find: R): ReadonlyDataset<R>
+  match<R extends Partial<Q> = Q>(find: R): ReadonlyDataset<Q & R>
+  match(find: Quad | QuadFind): ReadonlyDataset<Q> {
+    return this.filter((quad: Q): quad is Q => isMatch(quad, find))
   }
 
   has(find: Quad | QuadFind): boolean {
@@ -78,32 +98,32 @@ export class ReadonlyDataset implements ReadonlyDataset, Iterable<Quad> {
   }
 
   contains(dataset: Iterable<Quad | QuadLike>): boolean {
-    return new ReadonlyDataset(dataset).every(value => this.has(value))
+    return new ReadonlyDataset(quads(dataset)).every(value => this.has(value))
   }
 
   difference(dataset: Iterable<Quad | QuadLike>): ReadonlyDataset {
-    return new ReadonlyDataset(dataset).except(value => this.has(value))
+    return new ReadonlyDataset(quads(dataset)).except(value => this.has(value))
   }
 
-  equals(dataset: Iterable<Quad | QuadLike>): boolean {
-    return new ReadonlyDataset(dataset).every(value => this.has(value))
+  equals(dataset: Iterable<Q | QuadLike>): boolean {
+    return new ReadonlyDataset(quads(dataset)).every(value => this.has(value))
   }
 
-  every(iteratee: FilterIterateeFn<Quad>): boolean {
+  every(iteratee: FilterIterateeFn<Q>): boolean {
     return this.except(iteratee).empty
   }
 
-  forEach(iteratee: RunIteratee<Quad>): void {
+  forEach(iteratee: RunIteratee<Q>): void {
     for (const value of this) {
       iteratee(value)
     }
   }
 
   intersection(dataset: Iterable<Quad | QuadLike>): ReadonlyDataset {
-    return new ReadonlyDataset(dataset).filter(value => this.has(value))
+    return new ReadonlyDataset(quads(dataset)).filter(value => this.has(value))
   }
 
-  map(iteratee: MapIteratee<Quad, QuadLike>): ReadonlyDataset {
+  map(iteratee: MapIteratee<Q, QuadLike>): ReadonlyDataset {
     return new ReadonlyDataset({
       [Symbol.iterator]: map.bind(this)
     })
@@ -120,11 +140,11 @@ export class ReadonlyDataset implements ReadonlyDataset, Iterable<Quad> {
     }
   }
 
-  some(iteratee: FilterIterateeFn<Quad>): boolean {
+  some(iteratee: FilterIterateeFn<Q>): boolean {
     return !this.filter(iteratee).empty
   }
 
-  toArray(): Quad[] {
+  toArray(): Q[] {
     return Array.from(this)
   }
 
@@ -146,10 +166,7 @@ export class ReadonlyDataset implements ReadonlyDataset, Iterable<Quad> {
     if (!this.#source) {
       return
     }
-    for (const value of this.#source) {
-      const quad = isQuad(value) ? value : DefaultDataFactory.fromQuad(value)
-      yield quad
-    }
+    yield* this.#source
   }
 
   get size() {
