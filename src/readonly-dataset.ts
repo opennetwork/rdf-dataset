@@ -61,6 +61,7 @@ export class ReadonlyDataset<Q extends Quad = Quad> implements ReadonlyDataset<Q
   }
 
   filter<R extends Q = Q>(iteratee: FilterIterateeIsFn<Q, R>): ReadonlyDataset<R>
+  filter(iteratee: FilterIterateeFn<Q>): ReadonlyDataset<Q>
   filter(iteratee: FilterIterateeFn<Q>): ReadonlyDataset<Q> {
     return new ReadonlyDataset({
       [Symbol.iterator]: filter.bind(this)
@@ -89,6 +90,7 @@ export class ReadonlyDataset<Q extends Quad = Quad> implements ReadonlyDataset<Q
 
   match<R extends Q = Q>(find: R): ReadonlyDataset<R>
   match<R extends Partial<Q> = Q>(find: R): ReadonlyDataset<Q & R>
+  match(find: Quad | QuadFind): ReadonlyDataset<Q>
   match(find: Quad | QuadFind): ReadonlyDataset<Q> {
     return this.filter((quad: Q): quad is Q => isMatch(quad, find))
   }
