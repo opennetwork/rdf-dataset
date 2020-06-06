@@ -22,8 +22,8 @@ export interface ReadonlyDataset<Q extends Quad = Quad> extends Iterable<Q> {
 }
 
 export interface ReadonlyDataset<Q extends Quad = Quad> {
-  filter(iteratee: FilterIterateeFn<Q>): ReadonlyDataset<Q>
   filter<R extends Q = Q>(iteratee: FilterIterateeIsFn<Q, R>): ReadonlyDataset<R>
+  filter(iteratee: FilterIterateeFn<Q>): ReadonlyDataset<Q>
   except(iteratee: FilterIterateeFn<Q>): ReadonlyDataset<Q>
   match(find: Quad | QuadFind): ReadonlyDataset<Q>
   match<R extends Q = Q>(find: R): ReadonlyDataset<R>
