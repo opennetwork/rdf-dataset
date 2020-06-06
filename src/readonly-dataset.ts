@@ -60,8 +60,8 @@ export class ReadonlyDataset<Q extends Quad = Quad> implements ReadonlyDataset<Q
     this.#source = source
   }
 
-  filter(iteratee: FilterIterateeFn<Q>): ReadonlyDataset<Q>
-  filter<R extends Q = Q>(iteratee: FilterIterateeIsFn<Q, R>): ReadonlyDataset<R> {
+  filter<R extends Q = Q>(iteratee: FilterIterateeIsFn<Q, R>): ReadonlyDataset<R>
+  filter(iteratee: FilterIterateeFn<Q>): ReadonlyDataset<Q> {
     return new ReadonlyDataset({
       [Symbol.iterator]: filter.bind(this)
     })
