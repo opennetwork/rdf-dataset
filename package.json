@@ -18,10 +18,7 @@
   "peerDependencies": {
     "@opennetwork/rdf-data-model": "^4.0.0"
   },
-  "dependencies": {
-    "iterable": "^5.7.0",
-    "tsdef": "^0.0.13"
-  },
+  "dependencies": {},
   "repository": {
     "type": "git",
     "url": "https://github.com/opennetwork/rdf-dataset.git"
