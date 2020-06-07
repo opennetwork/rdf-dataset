@@ -17,7 +17,7 @@ export interface Dataset {
   addAll(dataset: Iterable<Quad | QuadLike>): Dataset
   import(dataset: AsyncIterable<Quad | QuadLike>): Promise<unknown>
   delete(quad: Quad | QuadLike | QuadFind): Dataset
-  replace(replacing: Quad | Iterable<Quad>, replacers: Quad | QuadLike | Iterable<Quad | QuadLike>): Dataset
+  replace(replacing: Quad | QuadLike | Iterable<Quad | QuadLike>, replacers: Quad | QuadLike | Iterable<Quad | QuadLike>): Dataset
 }
 export class Dataset extends ReadonlyDataset {
 
@@ -66,8 +66,8 @@ export class Dataset extends ReadonlyDataset {
     this.#set.delete(quad)
   }
 
-  replace(replacing: Quad | Iterable<Quad>, replacers: Quad | QuadLike | Iterable<Quad | QuadLike>): Dataset {
-    const replacingDataset = new Set(new ReadonlyDataset(isQuad(replacing) ? [replacing] : replacing).filter(quad => this.has(quad)))
+  replace(replacing: Quad | QuadLike | Iterable<Quad | QuadLike>, replacers: Quad | QuadLike | Iterable<Quad | QuadLike>): Dataset {
+    const replacingDataset = new Set(new ReadonlyDataset().union((isQuad(replacing) || isQuadLike(replacing)) ? [replacing] : replacing).filter(quad => this.has(quad)))
     if (!replacingDataset.size) {
       return
     }
