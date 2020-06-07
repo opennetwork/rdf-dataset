@@ -2,10 +2,10 @@ import {
   isQuad,
   DefaultDataFactory,
   Quad,
-  QuadLike
+  QuadLike, isQuadLike
 } from "@opennetwork/rdf-data-model"
 import { ReadonlyDataset } from "./readonly-dataset"
-import { QuadFind } from "./match"
+import {isQuadFind, QuadFind} from "./match"
 import { SetLike } from "./set-like"
 
 export interface Dataset extends ReadonlyDataset {
@@ -17,6 +17,7 @@ export interface Dataset {
   addAll(dataset: Iterable<Quad | QuadLike>): Dataset
   import(dataset: AsyncIterable<Quad | QuadLike>): Promise<unknown>
   delete(quad: Quad | QuadLike | QuadFind): Dataset
+  replace(replacing: Quad | Iterable<Quad>, replacers: Quad | QuadLike | Iterable<Quad | QuadLike>): Dataset
 }
 export class Dataset extends ReadonlyDataset {
 
@@ -63,6 +64,22 @@ export class Dataset extends ReadonlyDataset {
 
   protected deleteSource(quad: Quad) {
     this.#set.delete(quad)
+  }
+
+  replace(replacing: Quad | Iterable<Quad>, replacers: Quad | QuadLike | Iterable<Quad | QuadLike>): Dataset {
+    const replacingDataset = new Set(new ReadonlyDataset(isQuad(replacing) ? [replacing] : replacing).filter(quad => this.has(quad)))
+    if (!replacingDataset.size) {
+      return
+    }
+    for (const toDelete of replacingDataset) {
+      this.delete(toDelete)
+    }
+    if (isQuad(replacers) || isQuadLike(replacers)) {
+      this.add(replacers)
+    } else {
+      this.addAll(replacers)
+    }
+    return this
   }
 
   get size() {

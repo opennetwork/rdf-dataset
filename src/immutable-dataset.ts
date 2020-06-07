@@ -2,11 +2,12 @@ import {
   isQuad,
   DefaultDataFactory,
   Quad,
-  QuadLike
+  QuadLike, isQuadLike
 } from "@opennetwork/rdf-data-model"
 import { Dataset } from "./dataset"
 import { QuadFind } from "./match"
 import { SetLike } from "./set-like"
+import {ReadonlyDataset} from "./readonly-dataset";
 
 export interface ImmutableDataset extends Dataset {
 
@@ -17,6 +18,7 @@ export interface ImmutableDataset {
   addAll(dataset: Iterable<Quad | QuadLike>): ImmutableDataset
   import(dataset: AsyncIterable<Quad | QuadLike>): Promise<ImmutableDataset>
   delete(quad: Quad | QuadLike | QuadFind): ImmutableDataset
+  replace(replacing: Quad | QuadLike | QuadFind | Iterable<Quad | QuadLike | QuadFind>, replacers: Quad | QuadLike | Iterable<Quad | QuadLike>): ImmutableDataset
 }
 
 export class ImmutableDataset extends Dataset {
@@ -37,7 +39,7 @@ export class ImmutableDataset extends Dataset {
   }
 
   async import(dataset: AsyncIterable<Quad | QuadLike>, eager?: boolean): Promise<ImmutableDataset> {
-    const next =this.constructSet(this.#set)
+    const next = this.constructSet(this.#set)
     for await (const value of dataset) {
       next.add(isQuad(value) ? value : DefaultDataFactory.fromQuad(value))
     }
@@ -46,6 +48,19 @@ export class ImmutableDataset extends Dataset {
 
   delete(quad: Quad | QuadLike | QuadFind) {
     return new ImmutableDataset(this.constructSet(this.without(quad)))
+  }
+
+  replace(replacing: Quad | Iterable<Quad>, replacers: Quad | QuadLike | Iterable<Quad | QuadLike>): ImmutableDataset {
+    const replacingDataset = new Set(new ReadonlyDataset(isQuad(replacing) ? [replacing] : replacing).filter(quad => this.has(quad)))
+    if (!replacingDataset.size) {
+      // No changes, nothing to replace
+      return this
+    }
+    return new ImmutableDataset(this.constructSet(
+      this
+        .except(quad => replacingDataset.has(quad))
+        .union((isQuad(replacers) || isQuadLike(replacers)) ? [replacers] : replacers)
+    ))
   }
 
   private constructSet(initial?: Iterable<Quad>) {
