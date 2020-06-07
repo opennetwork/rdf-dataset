@@ -50,8 +50,8 @@ export class ImmutableDataset extends Dataset {
     return new ImmutableDataset(this.constructSet(this.without(quad)))
   }
 
-  replace(replacing: Quad | Iterable<Quad>, replacers: Quad | QuadLike | Iterable<Quad | QuadLike>): ImmutableDataset {
-    const replacingDataset = new Set(new ReadonlyDataset(isQuad(replacing) ? [replacing] : replacing).filter(quad => this.has(quad)))
+  replace(replacing: Quad | QuadLike | Iterable<Quad | QuadLike>, replacers: Quad | QuadLike | Iterable<Quad | QuadLike>): ImmutableDataset {
+    const replacingDataset = new Set(new ReadonlyDataset().union((isQuad(replacing) || isQuadLike(replacing)) ? [replacing] : replacing).filter(quad => this.has(quad)))
     if (!replacingDataset.size) {
       // No changes, nothing to replace
       return this
