@@ -18,7 +18,7 @@ export interface ImmutableDataset {
   addAll(dataset: Iterable<Quad | QuadLike>): ImmutableDataset
   import(dataset: AsyncIterable<Quad | QuadLike>): Promise<ImmutableDataset>
   delete(quad: Quad | QuadLike | QuadFind): ImmutableDataset
-  replace(replacing: Quad | QuadLike | QuadFind | Iterable<Quad | QuadLike | QuadFind>, replacers: Quad | QuadLike | Iterable<Quad | QuadLike>): ImmutableDataset
+  replace(replacing: Quad | QuadLike | Iterable<Quad | QuadLike>, replacers: Quad | QuadLike | Iterable<Quad | QuadLike>): ImmutableDataset
 }
 
 export class ImmutableDataset extends Dataset {
