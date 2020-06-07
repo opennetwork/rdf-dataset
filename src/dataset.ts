@@ -57,8 +57,12 @@ export class Dataset extends ReadonlyDataset {
   }
 
   delete(quad: Quad | QuadLike | QuadFind): Dataset {
-    this.match(quad).forEach(quad => this.#set.delete(quad))
+    this.match(quad).forEach(this.deleteSource.bind(this))
     return this
+  }
+
+  protected deleteSource(quad: Quad) {
+    this.#set.delete(quad)
   }
 
   get size() {
