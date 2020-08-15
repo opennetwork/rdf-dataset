@@ -1,5 +1,5 @@
 import { DefaultDataFactory, isQuad, isQuadLike, Quad, QuadLike } from "@opennetwork/rdf-data-model"
-import { isMatch, QuadFind } from "./match"
+import { matcher, QuadFind } from "./match"
 
 export interface FilterIterateeFn<T> {
   (value: T): boolean
@@ -36,7 +36,7 @@ export interface ReadonlyDataset<Q extends Quad = Quad> {
   every(iteratee: FilterIterateeFn<Q>): boolean
   forEach(iteratee: RunIteratee<Q>): void
   intersection(dataset: Iterable<Quad | QuadLike>): ReadonlyDataset
-  map(iteratee: MapIteratee<Q, QuadLike>): ReadonlyDataset
+  map(iteratee: MapIteratee<Q, Quad | QuadLike>): ReadonlyDataset
   some(iteratee: FilterIterateeFn<Q>): boolean
   toArray(): Q[]
   union(dataset: Iterable<Quad | QuadLike>): ReadonlyDataset
@@ -92,7 +92,7 @@ export class ReadonlyDataset<Q extends Quad = Quad> implements ReadonlyDataset<Q
   match<R extends Partial<Q> = Q>(find: R): ReadonlyDataset<Q & R>
   match(find: Quad | QuadFind): ReadonlyDataset<Q>
   match(find: Quad | QuadFind): ReadonlyDataset<Q> {
-    return this.filter((quad: Q): quad is Q => isMatch(quad, find))
+    return this.filter(matcher(find))
   }
 
   has(find: Quad | QuadFind): boolean {
@@ -125,7 +125,7 @@ export class ReadonlyDataset<Q extends Quad = Quad> implements ReadonlyDataset<Q
     return new ReadonlyDataset(quads(dataset)).filter(value => this.has(value))
   }
 
-  map(iteratee: MapIteratee<Q, QuadLike>): ReadonlyDataset {
+  map(iteratee: MapIteratee<Q, Quad | QuadLike>): ReadonlyDataset {
     return new ReadonlyDataset({
       [Symbol.iterator]: map.bind(this)
     })
@@ -151,17 +151,18 @@ export class ReadonlyDataset<Q extends Quad = Quad> implements ReadonlyDataset<Q
   }
 
   union(dataset: Iterable<Quad | QuadLike>): ReadonlyDataset {
-    return new ReadonlyDataset({
-      [Symbol.iterator]: union.bind(this)
-    })
-    function *union() {
-      // Take a snapshot of both before we start to yield, so we get a consistent "current view" of the two iterables
-      // These are still "live" iterables and can be added to, but the changes won't take effect within this union
-      const left = Array.from(this)
-      const right = Array.from(dataset)
-      yield *left
-      yield *right
-    }
+    // Take a snapshot of both before we start to yield, so we get a consistent "current view" of the two iterables
+    // These are still "live" iterables and can be added to, but the changes won't take effect within this union
+    return new ReadonlyDataset(
+      new Set([
+        ...this,
+        ...quads(dataset)
+      ])
+    )
+  }
+
+  without(find: Quad | QuadFind): ReadonlyDataset<Q> {
+    return this.except(matcher(find))
   }
 
   *[Symbol.iterator]() {
@@ -186,7 +187,9 @@ export class ReadonlyDataset<Q extends Quad = Quad> implements ReadonlyDataset<Q
   get empty() {
     const iterator = this[Symbol.iterator]()
     const next = iterator.next()
-    iterator.return()
+    if (iterator.return) {
+      iterator.return()
+    }
     return next.done
   }
 }

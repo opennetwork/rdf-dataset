@@ -62,3 +62,11 @@ export function isMatch(quad: QuadLike, find: QuadFind): boolean {
     )
   )
 }
+
+export interface Matcher {
+  (quad: QuadLike): boolean
+}
+
+export function matcher(find: QuadFind): Matcher {
+  return quad => isMatch(quad, find)
+}

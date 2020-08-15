@@ -2,23 +2,23 @@ import {
   isQuad,
   DefaultDataFactory,
   Quad,
-  QuadLike, isQuadLike
+  QuadLike
 } from "@opennetwork/rdf-data-model"
 import { ReadonlyDataset } from "./readonly-dataset"
-import {isQuadFind, QuadFind} from "./match"
+import { QuadFind } from "./match"
 import { SetLike } from "./set-like"
 
-export interface Dataset extends ReadonlyDataset {
+export interface Dataset extends ReadonlyDataset<Quad> {
 
 }
 
 export interface Dataset {
   add(value: Quad | QuadLike): Dataset
   addAll(dataset: Iterable<Quad | QuadLike>): Dataset
-  import(dataset: AsyncIterable<Quad | QuadLike>): Promise<unknown>
+  import(dataset: AsyncIterable<Quad | QuadLike>, eager?: boolean): Promise<unknown>
   delete(quad: Quad | QuadLike | QuadFind): Dataset
-  replace(replacing: Quad | QuadLike | Iterable<Quad | QuadLike>, replacers: Quad | QuadLike | Iterable<Quad | QuadLike>): Dataset
 }
+
 export class Dataset extends ReadonlyDataset {
 
   readonly #set: SetLike<Quad>
@@ -28,9 +28,16 @@ export class Dataset extends ReadonlyDataset {
     this.#set = set
   }
 
+  has(find: Quad | QuadFind): boolean {
+    if (isQuad(find) && this.#set.has && this.#set.has(find)) {
+      return true
+    }
+    return super.has(find)
+  }
+
   add(value: Quad | QuadLike): Dataset {
     const quad = isQuad(value) ? value : DefaultDataFactory.fromQuad(value)
-    if (this.#set.has ? this.#set.has(quad) : this.has(quad)) {
+    if (this.has(quad)) {
       return this
     }
     this.#set.add(quad)
@@ -38,19 +45,19 @@ export class Dataset extends ReadonlyDataset {
   }
 
   addAll(dataset: Iterable<Quad | QuadLike>): Dataset {
-    for (const value of dataset) {
+    for (const value of new Set(dataset)) {
       this.add(value)
     }
     return this
   }
 
   async import(dataset: AsyncIterable<Quad | QuadLike>, eager?: boolean): Promise<unknown> {
-    const values: (Quad | QuadLike)[] = []
+    const values = new Set<Quad | QuadLike>()
     for await (const value of dataset) {
       if (eager) {
         this.add(value)
       } else {
-        values.push(value)
+        values.add(value)
       }
     }
     this.addAll(values)
@@ -64,22 +71,6 @@ export class Dataset extends ReadonlyDataset {
 
   protected deleteSource(quad: Quad) {
     this.#set.delete(quad)
-  }
-
-  replace(replacing: Quad | QuadLike | Iterable<Quad | QuadLike>, replacers: Quad | QuadLike | Iterable<Quad | QuadLike>): Dataset {
-    const replacingDataset = new Set(new ReadonlyDataset().union((isQuad(replacing) || isQuadLike(replacing)) ? [replacing] : replacing).filter(quad => this.has(quad)))
-    if (!replacingDataset.size) {
-      return
-    }
-    for (const toDelete of replacingDataset) {
-      this.delete(toDelete)
-    }
-    if (isQuad(replacers) || isQuadLike(replacers)) {
-      this.add(replacers)
-    } else {
-      this.addAll(replacers)
-    }
-    return this
   }
 
   get size() {
