@@ -25,18 +25,38 @@ export interface Dataset {
   unpartition(match: PartitionFilterFn): void
 }
 
+export interface DatasetOptions {
+  match?: PartitionFilterFn
+}
+
+function matchPartition(input: Iterable<Quad>, options: DatasetOptions): Iterable<Quad> {
+  if (!options.match) {
+    return input
+  }
+  return new ReadonlyDataset(input).filter(options.match)
+}
+
 export class Dataset extends ReadonlyDataset {
 
   readonly #set: SetLike<Quad>
 
   readonly #partitions: [PartitionFilterFn, Dataset][] = []
 
-  constructor(set: SetLike<Quad> = new Set()) {
-    super(set)
+  readonly #options: Readonly<DatasetOptions>
+
+  constructor(set: SetLike<Quad> = new Set(), options: DatasetOptions = {}) {
+    super(matchPartition(set, options))
     this.#set = set
+    this.#options = Object.freeze(options)
   }
 
   has(find: Quad | QuadFind): boolean {
+
+    // If it is a quad and does not match our filter, it is not within this partition
+    if (isQuad(find) && this.#options.match && !this.#options.match(find)) {
+      return false
+    }
+
     // Shortcut, sadly this does not shortcut for partitions...
     if (isQuad(find) && this.#set.has && this.#set.has(find)) {
       return true
@@ -46,9 +66,15 @@ export class Dataset extends ReadonlyDataset {
 
   add(value: Quad | QuadLike): Dataset {
     const quad = isQuad(value) ? value : DefaultDataFactory.fromQuad(value)
+
+    if (this.#options.match && !this.#options.match(quad)) {
+      throw new Error("This Quad cannot be added to this dataset, the Dataset is a partition with a given match filter that disallows this, as a best practice, please write to the core Dataset")
+    }
+
     if (this.has(quad)) {
       return this
     }
+
     const partitions = new Set(this.matchPartitions(quad))
 
     if (partitions.size > 1) {
@@ -96,6 +122,7 @@ export class Dataset extends ReadonlyDataset {
       // If this deletes all instances of the quad, the following match will not iterate
       partition.delete(quad)
     }
+    // Partition deletes will directly use `this.match`, which
     for (const matched of this.match(quad)) {
       for (const partition of this.matchPartitions(matched)) {
         // If we deleted it earlier, we don't need to delete it again from that partition
@@ -122,74 +149,65 @@ export class Dataset extends ReadonlyDataset {
   }
 
   get size() {
+    // If we have a matcher, the actual size may be different from the
+    // set size, meaning we won't have an accurate value, `super.size` iterates the source and calculates the size
+    if (this.#options.match) {
+      return super.size
+    }
     return this.#set.size
   }
 
   partition(match: PartitionFilterFn) {
-    return constructPartition.call(
-      this,
-      this.#set,
-      match,
-      this.#partitions,
-      (set: SetLike<Quad>) => new Dataset(set)
-    )
+    const found = this.#partitions.find(([fn]) => fn === match)
+    if (found) {
+      return found[1]
+    }
+    const partitionData = this.constructSet(this.filter(match))
+    // Remove from primary
+    for (const matched of partitionData) {
+      this.deleteSource(matched)
+    }
+    const partitionSet = new Dataset(partitionData, {
+      match
+    })
+    this.#partitions.push([match, partitionSet])
+    return partitionSet
   }
 
   unpartition(match: PartitionFilterFn) {
-    return deconstructPartition.call(
-      this,
-      match,
-      this.#partitions
-    )
+    const partitionIndex = this.#partitions.findIndex(([fn]) => fn === match)
+    if (partitionIndex === -1) {
+      return
+    }
+    const [,partition] = this.#partitions[partitionIndex]
+    // Remove partition, no longer is added to, but now data is within this dataset
+    this.#partitions.splice(partitionIndex, 1)
+
+    // ... so we retain partition contents back into the dataset
+    this.addAll(partition)
+  }
+
+  protected constructSet(initial?: Iterable<Quad>): SetLike<Quad> {
+    const { construct } = this.#set
+    if (construct) {
+      return construct(initial)
+    } else {
+      return new Set(initial)
+    }
   }
 
   *[Symbol.iterator]():  Generator<Quad, void, undefined> {
     if (this.#partitions.length === 0) {
+      // See constructor for partitions role in this value
       return yield* super[Symbol.iterator]()
     }
 
-    yield* this.#set
+    yield* matchPartition(this.#set, this.#options)
 
     for (const [, set] of this.#partitions) {
-      yield* set
+      yield* matchPartition(set, this.#options)
     }
 
   }
 
-}
-
-export function constructSet<T>(set: SetLike<T>, initial?: Iterable<T>): SetLike<T> {
-  if (set.construct) {
-    return set.construct(initial)
-  } else {
-    return new Set(initial)
-  }
-}
-
-export function constructPartition(this: Dataset, set: SetLike<Quad>, match: PartitionFilterFn, partitions: [PartitionFilterFn, Dataset][], construct: (set: SetLike<Quad>) => Dataset): Dataset {
-  const found = partitions.find(([fn]) => fn === match)
-  if (found) {
-    return found[1]
-  }
-  const partitionData = constructSet(set, this.filter(match))
-  // Remove from primary
-  for (const matched of partitionData) {
-    this.deleteSource(matched)
-  }
-  const partitionSet = construct(partitionData)
-  partitions.push([match, partitionSet])
-  return partitionSet
-}
-
-export function deconstructPartition(this: Dataset, match: PartitionFilterFn, partitions: [PartitionFilterFn, Dataset][]) {
-  const partitionIndex = partitions.findIndex(([fn]) => fn === match)
-  if (partitionIndex === -1) {
-    return
-  }
-  const [,partition] = partitions[partitionIndex]
-  // Remove partition, no longer is added to, but now data is within this dataset
-  partitions.splice(partitionIndex, 1)
-
-  // ... so we retain partition contents back into the dataset
-  this.addAll(partition)
 }
