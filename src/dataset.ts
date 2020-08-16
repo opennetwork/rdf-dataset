@@ -36,6 +36,7 @@ export class Dataset extends ReadonlyDataset {
   }
 
   has(find: Quad | QuadFind): boolean {
+    // Shortcut, sadly this does not shortcut for partitions...
     if (isQuad(find) && this.#set.has && this.#set.has(find)) {
       return true
     }
@@ -47,7 +48,22 @@ export class Dataset extends ReadonlyDataset {
     if (this.has(quad)) {
       return this
     }
-    this.#set.add(quad)
+    const partitions = new Set(this.matchPartitions(quad))
+
+    if (partitions.size > 1) {
+      const error: Error & { partitions?: Set<Dataset>, quad?: Quad } = new Error(`Multiple partitions match the quad ${JSON.stringify(quad)}`)
+      error.partitions = partitions
+      error.quad = quad
+      throw error
+    }
+
+    if (partitions.size === 1) {
+      const [partition] = [...partitions]
+      partition.add(quad)
+    } else {
+      this.#set.add(quad)
+    }
+
     return this
   }
 
@@ -72,10 +88,32 @@ export class Dataset extends ReadonlyDataset {
   }
 
   delete(quad: Quad | QuadLike | QuadFind): Dataset {
+    // Deletes saturate the partitions for instances of the quad, even though only a single partition should contain
+    // the quad...
+    const basePartitions = new Set(this.matchPartitions(quad))
+    for (const partition of basePartitions) {
+      // If this deletes all instances of the quad, the following match will not iterate
+      partition.delete(quad)
+    }
     for (const matched of this.match(quad)) {
+      for (const partition of this.matchPartitions(matched)) {
+        // If we deleted it earlier, we don't need to delete it again from that partition
+        if (basePartitions.has(partition)) {
+          continue
+        }
+        partition.delete(matched)
+      }
       this.deleteSource(matched)
     }
     return this
+  }
+
+  protected *matchPartitions(quad: Quad | QuadLike | QuadFind) {
+    for (const [match, partition] of this.#partitions) {
+      if (match(quad)) {
+        yield partition
+      }
+    }
   }
 
   protected deleteSource(quad: Quad) {
