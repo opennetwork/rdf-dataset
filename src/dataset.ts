@@ -22,6 +22,7 @@ export interface Dataset {
   import(dataset: AsyncIterable<Quad | QuadLike>, eager?: boolean): Promise<unknown>
   delete(quad: Quad | QuadLike | QuadFind): Dataset
   partition(match: PartitionFilterFn): Dataset
+  unpartition(match: PartitionFilterFn): void
 }
 
 export class Dataset extends ReadonlyDataset {
@@ -134,6 +135,14 @@ export class Dataset extends ReadonlyDataset {
     )
   }
 
+  unpartition(match: PartitionFilterFn) {
+    return deconstructPartition.call(
+      this,
+      match,
+      this.#partitions
+    )
+  }
+
   *[Symbol.iterator]():  Generator<Quad, void, undefined> {
     if (this.#partitions.length === 0) {
       return yield* super[Symbol.iterator]()
@@ -170,4 +179,17 @@ export function constructPartition(this: Dataset, set: SetLike<Quad>, match: Par
   const partitionSet = construct(partitionData)
   partitions.push([match, partitionSet])
   return partitionSet
+}
+
+export function deconstructPartition(this: Dataset, match: PartitionFilterFn, partitions: [PartitionFilterFn, Dataset][]) {
+  const partitionIndex = partitions.findIndex(([fn]) => fn === match)
+  if (partitionIndex === -1) {
+    return
+  }
+  const [,partition] = partitions[partitionIndex]
+  // Remove partition, no longer is added to, but now data is within this dataset
+  partitions.splice(partitionIndex, 1)
+
+  // ... so we retain partition contents back into the dataset
+  this.addAll(partition)
 }
