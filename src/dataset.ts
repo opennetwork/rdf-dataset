@@ -1,12 +1,9 @@
 import {
-  isQuad,
-  DefaultDataFactory,
   Quad,
   QuadLike
 } from "@opennetwork/rdf-data-model"
 import {FilterIterateeFn, ReadonlyDataset} from "./readonly-dataset"
 import { QuadFind } from "./match"
-import { SetLike } from "./set-like"
 import {MutateDataset} from "./mutate-dataset";
 import {mutateArray} from "./mutate-array";
 
