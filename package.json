@@ -25,7 +25,7 @@
   },
   "devDependencies": {
     "@opennetwork/environment": "^1.0.2",
-    "@opennetwork/rdf-data-model": "^5.3.0",
+    "@opennetwork/rdf-data-model": "^5.3.1",
     "@types/node": "^14.0.1",
     "esm": "^3.2.25",
     "filehound": "^1.17.4",

@@ -46,10 +46,10 @@
   resolved "https://registry.npmjs.org/@opennetwork/http-representation/-/http-representation-3.0.0.tgz#5665ee2a5900dc53cff207aef491144bed0ce32f"
   integrity sha512-g3davRpiR4m9vMhEtocjiENRBgJRnzNd9tWmO2b9E0z9Je5iVmMuzLvTqdP0p+Ew9RIbIEaC+ayEalIkLVgKOQ==
 
-"@opennetwork/rdf-data-model@^5.3.0":
-  version "5.3.0"
-  resolved "https://registry.npmjs.org/@opennetwork/rdf-data-model/-/rdf-data-model-5.3.0.tgz#0c32168bd75246e13d551c23412ec2bdcaead566"
-  integrity sha512-hLgi3RCzyVwhsfNQ4Pqmmx/Z9fINnFGCHYqwpubHFEZKsQzZbJV6CqIwllgz8N9WIf+oOX7hz4Y18+Y2O5wDbA==
+"@opennetwork/rdf-data-model@^5.3.1":
+  version "5.3.1"
+  resolved "https://registry.npmjs.org/@opennetwork/rdf-data-model/-/rdf-data-model-5.3.1.tgz#85a5886ca3d5b8cbefbca086f983cca6f833f89e"
+  integrity sha512-lnjHwYLr7MTkWdjETBzm2BGnqDWVKUDdg2muaQmese9nzw9+UQRMykXII7ppwSVNKTs9NOOFd8yYrZKTon/FcA==
   dependencies:
     pure-uuid "^1.6.0"
 

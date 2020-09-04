@@ -2,9 +2,8 @@ import {Quad, QuadLike} from "@opennetwork/rdf-data-model"
 import {QuadFind} from "./match"
 import {ReadonlyDataset} from "./readonly-dataset"
 import {MutateDataset} from "./mutate-dataset"
-import {SetLike} from "./set-like";
 
-export function mutateSet(source: SetLike<Quad> = new Set()): MutateDataset {
+export function mutateSet(source: Set<Quad> = new Set()): MutateDataset {
   return {
     construct(source: Iterable<Quad>): MutateDataset {
       return mutateSet(new Set(source))
