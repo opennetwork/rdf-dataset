@@ -36,7 +36,13 @@ export function mutateArray(source: ArrayLike<Iterable<Quad>> = []): MutateDatas
     delete(match: Quad | QuadLike | QuadFind) {
       for (let index = 0; index < source.length; index += 1) {
         const part = source[index]
-        source[index] = new ReadonlyDataset(part).without(match).toArray()
+        const matched = new ReadonlyDataset(part).without(match)
+        // This will go through the entire part to ensure it doesn't include
+        // this matcher, if there is at least one value, we will start again and turn the matched into an array
+        // which will set the change "in stone"
+        if (!matched.empty) {
+          source[index] = matched.toArray()
+        }
       }
     },
     *[Symbol.iterator]() {
