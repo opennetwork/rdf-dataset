@@ -3,7 +3,12 @@ import {QuadFind} from "./match"
 import {ReadonlyDataset} from "./readonly-dataset"
 import {MutateDataset} from "./mutate-dataset"
 
-export function mutateSet(source: Set<Quad> = new Set()): MutateDataset {
+export interface SetLike<T> extends Iterable<T> {
+  add(value: T): void
+  delete(value: T): void
+}
+
+export function mutateSet(source: SetLike<Quad> = new Set()): MutateDataset {
   return {
     construct(source: Iterable<Quad>): MutateDataset {
       return mutateSet(new Set(source))
