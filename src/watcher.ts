@@ -1,7 +1,7 @@
 import {ReadonlyDataset, ReadonlyDatasetChange} from "./readonly-dataset"
 import {Quad} from "@opennetwork/rdf-data-model"
 import {PartitionFilterFn} from "./partition-filter"
-import {Collector} from "./collector";
+import {Collector, CollectorOptions} from "./collector";
 
 export interface DatasetWatcher extends AsyncIterable<ReadonlyDatasetChange> {
   add(quad: Quad): void
@@ -20,8 +20,12 @@ interface ChangeEvent {
 
 function mapChanges(events: Iterable<ChangeEvent>): ReadonlyDatasetChange {
   return [
-    new ReadonlyDataset(adds()),
-    new ReadonlyDataset(deletes()),
+    new ReadonlyDataset({
+      [Symbol.iterator]: adds
+    }),
+    new ReadonlyDataset({
+      [Symbol.iterator]: deletes
+    }),
     undefined
   ]
 
@@ -52,9 +56,13 @@ function mapChanges(events: Iterable<ChangeEvent>): ReadonlyDatasetChange {
 
 export class DatasetWatcher implements DatasetWatcher {
 
-  readonly #collector = new Collector(mapChanges)
+  readonly #collector: Collector<ChangeEvent, ReadonlyDatasetChange>
 
-  constructor() {
+  constructor(options: Partial<CollectorOptions<ChangeEvent, ReadonlyDatasetChange>>) {
+    this.#collector = new Collector({
+      map: mapChanges,
+      ...options
+    })
     this[Symbol.asyncIterator] = this.#collector[Symbol.asyncIterator].bind(this.#collector)
   }
 
