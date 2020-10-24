@@ -18,7 +18,9 @@
   "peerDependencies": {
     "@opennetwork/rdf-data-model": "^4.0.0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "promise.defer": "^2.0.0"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/opennetwork/rdf-dataset.git"

@@ -88,10 +88,16 @@ export class Dataset extends ReadonlyDataset {
         this.add(value)
       }
     } else {
-      this.#mutate.addAll(dataset)
-      this.#options.watch?.addAll(dataset)
+      this.#addAllToMutate(dataset, false)
     }
     return this
+  }
+
+  #addAllToMutate = (dataset: Iterable<Quad>, withoutWatch?: boolean) => {
+    this.#mutate.addAll(dataset)
+    if (!withoutWatch) {
+      this.#options.watch?.addAll(dataset)
+    }
   }
 
   async import(dataset: AsyncIterable<Quad>, eager?: boolean): Promise<unknown> {
@@ -167,7 +173,7 @@ export class Dataset extends ReadonlyDataset {
     const partitionSet = new Dataset({
       mutate: partitionMutate,
       match,
-      watch: this.#options.watch?.partition(match) || this.#options.watch
+      watch: this.#options.watch?.partition?.(match) || this.#options.watch
     })
     this.#partitions.push([match, partitionSet])
     return partitionSet
@@ -181,9 +187,10 @@ export class Dataset extends ReadonlyDataset {
     const [,partition] = this.#partitions[partitionIndex]
     // Remove partition, no longer is added to, but now data is within this dataset
     this.#partitions.splice(partitionIndex, 1)
-
+    this.#options.watch?.unpartition?.(match)
     // ... so we retain partition contents back into the dataset
-    this.addAll(partition)
+    // We don't want to trigger a watcher change
+    this.#addAllToMutate(partition, true)
   }
 
   *[Symbol.iterator]():  Generator<Quad, void, undefined> {

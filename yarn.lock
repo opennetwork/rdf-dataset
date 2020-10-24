@@ -327,6 +327,11 @@ path-parse@^1.0.6:
   resolved "https://registry.npmjs.org/path-parse/-/path-parse-1.0.6.tgz#d62dbb5679405d72c4737ec58600e9ddcf06d24c"
   integrity sha512-GSmOT2EbHrINBf9SR7CDELwlJ8AENk3Qn7OikK4nFYAu3Ote2+JYNVvkpAEQm3/TLNEJFD/xZJjzyxg3KBWOzw==
 
+promise.defer@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.npmjs.org/promise.defer/-/promise.defer-2.0.0.tgz#3b1dbd896824ac14f3fcf40248b7e720503af316"
+  integrity sha512-7T9TPDmRF8Zb5eLx7+OqnXUyaBs7nTKj63seeW3mTAce+IMf9yoSZf/1iT5dAYRtO4fqxfKUuRasBWY/5a2wlw==
+
 proper-lockfile@^1.2.0:
   version "1.2.0"
   resolved "https://registry.npmjs.org/proper-lockfile/-/proper-lockfile-1.2.0.tgz#ceff5dd89d3e5f10fb75e1e8e76bc75801a59c34"

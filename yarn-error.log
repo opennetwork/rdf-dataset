@@ -1,35 +1,35 @@
 Arguments: 
-  /usr/local/bin/node /usr/local/Cellar/yarn/1.17.3/libexec/bin/yarn.js add --dev @opennetwork/environment
+  /usr/local/Cellar/node/11.1.0/bin/node /usr/local/Cellar/yarn/1.15.2/libexec/bin/yarn.js add --dev @types/promise.defer
 
 PATH: 
-  /usr/local/bin:/usr/local/opt/coreutils/libexec/gnubin:/Users/fabian/bin:/Users/fabian/dotfiles/bin:/usr/local/mysql/bin:/usr/local/:/usr/local/sbin:/usr/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin/:/Users/fabian/.meteor
+  /Users/fabian/.fastlane/bin:/Users/fabian/.yarn/bin:/Users/fabian/.config/yarn/global/node_modules/.bin:/usr/local/bin:/usr/local/share/android-sdk/build-tools/28.0.2:/usr/local/share/android-sdk/platform-tools:/usr/local/share/android-sdk/tools:/usr/local/opt/gradle/bin:/usr/local/opt/maven/bin:/usr/local/opt/ant/bin:/Users/fabian/Library/Python/2.7/bin:/Users/fabian/.npm-packages/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Library/Apple/usr/bin:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/Users/fabian/src/network/rdf-dataset/node_modules/.bin
 
 Yarn version: 
-  1.17.3
+  1.15.2
 
 Node version: 
-  14.2.0
+  14.12.0
 
 Platform: 
   darwin x64
 
 Trace: 
-  Error: https://registry.npmjs.org/@opennetwork%2fenvironment: Not found
-      at Request.params.callback [as _callback] (/usr/local/Cellar/yarn/1.17.3/libexec/lib/cli.js:66830:18)
-      at Request.self.callback (/usr/local/Cellar/yarn/1.17.3/libexec/lib/cli.js:140464:22)
-      at Request.emit (events.js:315:20)
-      at Request.<anonymous> (/usr/local/Cellar/yarn/1.17.3/libexec/lib/cli.js:141436:10)
-      at Request.emit (events.js:315:20)
-      at IncomingMessage.<anonymous> (/usr/local/Cellar/yarn/1.17.3/libexec/lib/cli.js:141358:12)
-      at Object.onceWrapper (events.js:421:28)
-      at IncomingMessage.emit (events.js:327:22)
-      at endReadableNT (_stream_readable.js:1225:12)
-      at processTicksAndRejections (internal/process/task_queues.js:84:21)
+  Error: https://registry.npmjs.org/@types%2fpromise.defer: Not found
+      at Request.params.callback [as _callback] (/usr/local/Cellar/yarn/1.15.2/libexec/lib/cli.js:66058:18)
+      at Request.self.callback (/usr/local/Cellar/yarn/1.15.2/libexec/lib/cli.js:129541:22)
+      at Request.emit (events.js:314:20)
+      at Request.<anonymous> (/usr/local/Cellar/yarn/1.15.2/libexec/lib/cli.js:130513:10)
+      at Request.emit (events.js:314:20)
+      at IncomingMessage.<anonymous> (/usr/local/Cellar/yarn/1.15.2/libexec/lib/cli.js:130435:12)
+      at Object.onceWrapper (events.js:420:28)
+      at IncomingMessage.emit (events.js:326:22)
+      at endReadableNT (_stream_readable.js:1252:12)
+      at processTicksAndRejections (internal/process/task_queues.js:80:21)
 
 npm manifest: 
   {
     "name": "@opennetwork/rdf-dataset",
-    "version": "7.0.0",
+    "version": "11.0.0",
     "types": "./esnext/index.d.ts",
     "license": "MIT",
     "type": "module",
@@ -37,29 +37,32 @@ npm manifest:
     "author": "Fabian Cook <hello@fabiancook.dev>",
     "private": false,
     "scripts": {
-      "build": "rm -rf esnext && tsc && npm run tslint && npm run postbuild",
+      "build": "rm -rf esnext && tsc && npm run postbuild",
       "postbuild": "node scripts/post-build.js",
       "watch": "tsc -w",
       "tslint": "tslint -c tslint.json -p tsconfig.json",
-      "prepublishOnly": "npm run build"
+      "prepublishOnly": "npm run build",
+      "example": "node scripts/example.node.js"
     },
     "peerDependencies": {
       "@opennetwork/rdf-data-model": "^4.0.0"
     },
     "dependencies": {
-      "@opennetwork/lazy-set": "^5.0.0",
-      "tsdef": "^0.0.13"
+      "promise.defer": "^2.0.0"
     },
     "repository": {
       "type": "git",
       "url": "https://github.com/opennetwork/rdf-dataset.git"
     },
     "devDependencies": {
-      "@opennetwork/rdf-data-model": "^5.0.0",
+      "@opennetwork/environment": "^1.0.2",
+      "@opennetwork/rdf-data-model": "^5.3.1",
+      "@types/node": "^14.0.1",
       "esm": "^3.2.25",
       "filehound": "^1.17.4",
       "tslint": "^6.1.2",
-      "typescript": "^3.9.2"
+      "typescript": "^4.0.2",
+      "yjs": "^13.0.8"
     }
   }
 
@@ -87,17 +90,64 @@ Lockfile:
       esutils "^2.0.2"
       js-tokens "^4.0.0"
   
-  "@opennetwork/lazy-set@^5.0.0":
-    version "5.0.0"
-    resolved "https://registry.npmjs.org/@opennetwork/lazy-set/-/lazy-set-5.0.0.tgz#353c662ed1b393a96eb7fb8874abc7224514d9ea"
-    integrity sha512-WxboKc4HQiHIjiwk1tDUXoOYwweqjB3asI4415yrvbPDAXtjH6Tw1iWiLzl7RAG3Is9oC4DZFtD7mz2PZRKA+g==
+  "@edwardmx/noop@^1.0.1":
+    version "1.0.1"
+    resolved "https://registry.npmjs.org/@edwardmx/noop/-/noop-1.0.1.tgz#184b371febe5a719cd144fa8f6342a0e9023aecc"
+    integrity sha512-X2gftuabV5jAs+SkdvhgDZQ9GErGtZXh0zMPKJbevjpsZF74ulMygg1eYlNn7lSLcDP9pFVwU2ScEmlS0fYjaA==
   
-  "@opennetwork/rdf-data-model@^5.0.0":
-    version "5.0.0"
-    resolved "https://registry.npmjs.org/@opennetwork/rdf-data-model/-/rdf-data-model-5.0.0.tgz#99f1ed48582f0f865fd8868ec4793241cf8f5db8"
-    integrity sha512-ianbgKjtHMH3e99Ea1OkmBeMEM8X9SuWkTUvIlCfY1xFH72z5nTdgRmyJRiCAZqYZY4FywwkyByineOYaaZxCg==
+  "@opennetwork/environment@^1.0.2":
+    version "1.0.2"
+    resolved "https://registry.npmjs.org/@opennetwork/environment/-/environment-1.0.2.tgz#af5aa38dfddf947a72471ad2062b385c8fdf5ae2"
+    integrity sha512-l/AKC+hX5Ka65CA2Ezl+r1PtVZjvkaujFEdIJgrDC5KJPt6KtSs+CfLgr9e9TKkRpmS6LfYEhigMA0OVGHoO7Q==
+    dependencies:
+      "@edwardmx/noop" "^1.0.1"
+      "@opennetwork/http-representation" "^3.0.0"
+      "@opennetwork/http-representation-node" "^3.0.0"
+      "@opentelemetry/api" "^0.7.0"
+      abort-controller "^3.0.0"
+      dependency-graph "^0.9.0"
+      lit-html "^1.2.1"
+  
+  "@opennetwork/http-representation-node@^3.0.0":
+    version "3.0.0"
+    resolved "https://registry.npmjs.org/@opennetwork/http-representation-node/-/http-representation-node-3.0.0.tgz#5e9df9e2126fa9c5d99b84e5425129655d0b9c02"
+    integrity sha512-ZqNOQBSjQCztyTJOuJVewRcgcOHcUM7T3GFWn9ZNN+y6G4NLNdqG+vkp5Zv1n6fwUofhfkuxisXXRnl4zDkkHw==
+  
+  "@opennetwork/http-representation@^3.0.0":
+    version "3.0.0"
+    resolved "https://registry.npmjs.org/@opennetwork/http-representation/-/http-representation-3.0.0.tgz#5665ee2a5900dc53cff207aef491144bed0ce32f"
+    integrity sha512-g3davRpiR4m9vMhEtocjiENRBgJRnzNd9tWmO2b9E0z9Je5iVmMuzLvTqdP0p+Ew9RIbIEaC+ayEalIkLVgKOQ==
+  
+  "@opennetwork/rdf-data-model@^5.3.1":
+    version "5.3.1"
+    resolved "https://registry.npmjs.org/@opennetwork/rdf-data-model/-/rdf-data-model-5.3.1.tgz#85a5886ca3d5b8cbefbca086f983cca6f833f89e"
+    integrity sha512-lnjHwYLr7MTkWdjETBzm2BGnqDWVKUDdg2muaQmese9nzw9+UQRMykXII7ppwSVNKTs9NOOFd8yYrZKTon/FcA==
     dependencies:
       pure-uuid "^1.6.0"
+  
+  "@opentelemetry/api@^0.7.0":
+    version "0.7.0"
+    resolved "https://registry.npmjs.org/@opentelemetry/api/-/api-0.7.0.tgz#99be9ae3aa64c0e73077ac7c093ea81303aa609d"
+    integrity sha512-h4wdvfZ7y3Md3gRr0zycv6oFuqHjWdZ5oJGSoDGoyG6vQSPdIJorWH4SSalif8yW9l9T+bsAkHAt2VVG/BiW8g==
+    dependencies:
+      "@opentelemetry/context-base" "^0.7.0"
+  
+  "@opentelemetry/context-base@^0.7.0":
+    version "0.7.0"
+    resolved "https://registry.npmjs.org/@opentelemetry/context-base/-/context-base-0.7.0.tgz#b2493b3122f1e44ec8875da0846e58edec4ff80e"
+    integrity sha512-/mhheI4pUxr2OFYsCOFAu/U27v0N5ZK2WDNhVA1ZCqdmswe22Bu0dWoNrJvRB6j6kwCFxyy0YnzGFfQsAyAcsg==
+  
+  "@types/node@^14.0.1":
+    version "14.0.1"
+    resolved "https://registry.npmjs.org/@types/node/-/node-14.0.1.tgz#5d93e0a099cd0acd5ef3d5bde3c086e1f49ff68c"
+    integrity sha512-FAYBGwC+W6F9+huFIDtn43cpy7+SzG+atzRiTfdp3inUKL2hXnd4rG8hylJLIh4+hqrQy1P17kvJByE/z825hA==
+  
+  abort-controller@^3.0.0:
+    version "3.0.0"
+    resolved "https://registry.npmjs.org/abort-controller/-/abort-controller-3.0.0.tgz#eaf54d53b62bae4138e809ca225c8439a6efb392"
+    integrity sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg==
+    dependencies:
+      event-target-shim "^5.0.0"
   
   ansi-styles@^3.2.1:
     version "3.2.1"
@@ -167,6 +217,11 @@ Lockfile:
     resolved "https://registry.npmjs.org/concat-map/-/concat-map-0.0.1.tgz#d8a96bd77fd68df7793a73036a3ba0d5405d477b"
     integrity sha1-2Klr13/Wjfd5OnMDajug1UBdR3s=
   
+  dependency-graph@^0.9.0:
+    version "0.9.0"
+    resolved "https://registry.npmjs.org/dependency-graph/-/dependency-graph-0.9.0.tgz#11aed7e203bc8b00f48356d92db27b265c445318"
+    integrity sha512-9YLIBURXj4DJMFALxXw9K3Y3rwb5Fk0X5/8ipCzaN84+gKxoHK43tVKRNakCQbiEx07E8Uwhuq21BpUagFhZ8w==
+  
   diff@^4.0.1:
     version "4.0.2"
     resolved "https://registry.npmjs.org/diff/-/diff-4.0.2.tgz#60f3aecb89d5fae520c11aa19efc2bb982aade7d"
@@ -196,6 +251,11 @@ Lockfile:
     version "2.0.3"
     resolved "https://registry.npmjs.org/esutils/-/esutils-2.0.3.tgz#74d2eb4de0b8da1293711910d50775b9b710ef64"
     integrity sha512-kVscqXk4OCp68SZ0dkgEKVi6/8ij300KBWTJq32P/dYeWTSwK41WyTxalN1eRmA5Z9UU/LX9D7FWSmV9SAYx6g==
+  
+  event-target-shim@^5.0.0:
+    version "5.0.1"
+    resolved "https://registry.npmjs.org/event-target-shim/-/event-target-shim-5.0.1.tgz#5d4d3ebdf9583d63a5333ce2deb7480ab2b05789"
+    integrity sha512-i/2XbnSz/uxRCU6+NdVJgKWDTM427+MqYbkQzD321DuCQJUqOuJKIA0IM2+W2xtYHdKOmZ4dR6fExsd4SXL+WQ==
   
   extend@^3.0.0:
     version "3.0.2"
@@ -263,6 +323,11 @@ Lockfile:
     resolved "https://registry.npmjs.org/inherits/-/inherits-2.0.4.tgz#0fa2c64f932917c3433a0ded55363aae37416b7c"
     integrity sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==
   
+  isomorphic.js@^0.1.3:
+    version "0.1.3"
+    resolved "https://registry.npmjs.org/isomorphic.js/-/isomorphic.js-0.1.3.tgz#b2956e14be3bc10efb5fe80e6b5bebc16e1deeca"
+    integrity sha512-pabBRLDwYefSsNS+qCazJ97o7P5xDTrNoxSYFTM09JlZTxPrOEPGKekwqUy3/Np4C4PHnVUXHYsZPOix0jELsA==
+  
   js-tokens@^4.0.0:
     version "4.0.0"
     resolved "https://registry.npmjs.org/js-tokens/-/js-tokens-4.0.0.tgz#19203fb59991df98e3a287050d4647cdeaf32499"
@@ -275,6 +340,18 @@ Lockfile:
     dependencies:
       argparse "^1.0.7"
       esprima "^4.0.0"
+  
+  lib0@^0.2.26:
+    version "0.2.26"
+    resolved "https://registry.npmjs.org/lib0/-/lib0-0.2.26.tgz#2a016b2c13b40b08a81351fe47d2f371ab44b63a"
+    integrity sha512-DTf0VmFNi/eT+3Q+6rNHYdIAx69ROpvQkpnplpDoErW8NeRwjPwoIKjCF3rKebsMrQoxH4tFD1bvMQb4CUzcFg==
+    dependencies:
+      isomorphic.js "^0.1.3"
+  
+  lit-html@^1.2.1:
+    version "1.2.1"
+    resolved "https://registry.npmjs.org/lit-html/-/lit-html-1.2.1.tgz#1fb933dc1e2ddc095f60b8086277d4fcd9d62cc8"
+    integrity sha512-GSJHHXMGLZDzTRq59IUfL9FCdAlGfqNp/dEa7k7aBaaWD+JKaCjsAk9KYm2V12ItonVaYx2dprN66Zdm1AuBTQ==
   
   lodash@^4.17.10:
     version "4.17.15"
@@ -322,6 +399,11 @@ Lockfile:
     resolved "https://registry.npmjs.org/path-parse/-/path-parse-1.0.6.tgz#d62dbb5679405d72c4737ec58600e9ddcf06d24c"
     integrity sha512-GSmOT2EbHrINBf9SR7CDELwlJ8AENk3Qn7OikK4nFYAu3Ote2+JYNVvkpAEQm3/TLNEJFD/xZJjzyxg3KBWOzw==
   
+  promise.defer@^2.0.0:
+    version "2.0.0"
+    resolved "https://registry.npmjs.org/promise.defer/-/promise.defer-2.0.0.tgz#3b1dbd896824ac14f3fcf40248b7e720503af316"
+    integrity sha512-7T9TPDmRF8Zb5eLx7+OqnXUyaBs7nTKj63seeW3mTAce+IMf9yoSZf/1iT5dAYRtO4fqxfKUuRasBWY/5a2wlw==
+  
   proper-lockfile@^1.2.0:
     version "1.2.0"
     resolved "https://registry.npmjs.org/proper-lockfile/-/proper-lockfile-1.2.0.tgz#ceff5dd89d3e5f10fb75e1e8e76bc75801a59c34"
@@ -366,11 +448,6 @@ Lockfile:
     dependencies:
       has-flag "^3.0.0"
   
-  tsdef@^0.0.13:
-    version "0.0.13"
-    resolved "https://registry.npmjs.org/tsdef/-/tsdef-0.0.13.tgz#c71c2bd756c84887386ac8539ace63a38bc114e1"
-    integrity sha512-Twcdol23BQ+J+WD3NYhqusB7vvCDdK2bvcXnivgHu4xjrxnngUshgB+SWs2FN+I6BxY6BRkaE2KllO403GwbKA==
-  
   tslib@^1.10.0:
     version "1.13.0"
     resolved "https://registry.npmjs.org/tslib/-/tslib-1.13.0.tgz#c881e13cc7015894ed914862d276436fa9a47043"
@@ -407,10 +484,10 @@ Lockfile:
     dependencies:
       tslib "^1.8.1"
   
-  typescript@^3.9.2:
-    version "3.9.2"
-    resolved "https://registry.npmjs.org/typescript/-/typescript-3.9.2.tgz#64e9c8e9be6ea583c54607677dd4680a1cf35db9"
-    integrity sha512-q2ktq4n/uLuNNShyayit+DTobV2ApPEo/6so68JaD5ojvc/6GClBipedB9zNWYxRSAlZXAe405Rlijzl6qDiSw==
+  typescript@^4.0.2:
+    version "4.0.2"
+    resolved "https://registry.npmjs.org/typescript/-/typescript-4.0.2.tgz#7ea7c88777c723c681e33bf7988be5d008d05ac2"
+    integrity sha512-e4ERvRV2wb+rRZ/IQeb3jm2VxBsirQLpQhdxplZ2MEzGvDkkMmPglecnNDfSUBivMjP93vRbngYYDQqQ/78bcQ==
   
   unit-compare@^1.0.1:
     version "1.0.1"
@@ -423,3 +500,10 @@ Lockfile:
     version "1.0.2"
     resolved "https://registry.npmjs.org/wrappy/-/wrappy-1.0.2.tgz#b5243d8f3ec1aa35f1364605bc0d1036e30ab69f"
     integrity sha1-tSQ9jz7BqjXxNkYFvA0QNuMKtp8=
+  
+  yjs@^13.0.8:
+    version "13.0.8"
+    resolved "https://registry.npmjs.org/yjs/-/yjs-13.0.8.tgz#d78b322c018d9256d4d48c616f63689896c16a95"
+    integrity sha512-5jqQOnYgMQ5XpZElxdSAUPeNEHZIvP2PS3jClw0Gfnrn6Pp87Qpu4grnjH++dV1NkyBX8pc59sPqSyGt3UXmNw==
+    dependencies:
+      lib0 "^0.2.26"
