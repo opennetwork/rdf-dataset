@@ -18,8 +18,8 @@ export interface Dataset {
   addAll(dataset: Iterable<Quad>): Dataset
   import(dataset: AsyncIterable<Quad>, eager?: boolean): Promise<unknown>
   delete(quad: Quad | QuadFind): Dataset
-  partition(match: PartitionFilterFn): Dataset
-  unpartition(match: PartitionFilterFn): void
+  partition?(match: PartitionFilterFn): Dataset
+  unpartition?(match: PartitionFilterFn): void
   close?(): void
 }
 
@@ -46,6 +46,11 @@ export class Dataset extends ReadonlyDataset {
     if (options.watch) {
       this[Symbol.asyncIterator] = options.watch[Symbol.asyncIterator].bind(options.watch)
       this.close = options.watch.close?.bind(options.watch)
+    }
+
+    if (!this.#mutate.construct) {
+      this.partition = undefined
+      this.unpartition = undefined
     }
   }
 
@@ -159,7 +164,7 @@ export class Dataset extends ReadonlyDataset {
     return super.size
   }
 
-  partition(match: PartitionFilterFn) {
+  partition?(match: PartitionFilterFn) {
     if (!this.#mutate.construct) {
       throw new Error("This dataset cannot be partitioned")
     }
@@ -181,7 +186,7 @@ export class Dataset extends ReadonlyDataset {
     return partitionSet
   }
 
-  unpartition(match: PartitionFilterFn) {
+  unpartition?(match: PartitionFilterFn) {
     const partitionIndex = this.#partitions.findIndex(([fn]) => fn === match)
     if (partitionIndex === -1) {
       return
