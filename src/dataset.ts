@@ -20,6 +20,7 @@ export interface Dataset {
   delete(quad: Quad | QuadFind): Dataset
   partition(match: PartitionFilterFn): Dataset
   unpartition(match: PartitionFilterFn): void
+  close?(): void
 }
 
 function matchPartition(input: Iterable<Quad>, options: DatasetOptions): Iterable<Quad> {
@@ -44,6 +45,7 @@ export class Dataset extends ReadonlyDataset {
 
     if (options.watch) {
       this[Symbol.asyncIterator] = options.watch[Symbol.asyncIterator].bind(options.watch)
+      this.close = options.watch.close?.bind(options.watch)
     }
   }
 
