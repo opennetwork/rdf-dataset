@@ -1,6 +1,8 @@
 import { DefaultDataFactory, isQuad, isQuadLike, Quad, QuadLike } from "@opennetwork/rdf-data-model"
 import { matcher, QuadFind } from "./match"
 
+export type ReadonlyDatasetChange<Q extends Quad = Quad, Meta = unknown> = [ReadonlyDataset<Q>, ReadonlyDataset<Q>, Meta]
+
 export interface FilterIterateeFn<T> {
   (value: T): boolean
 }
@@ -18,7 +20,8 @@ export interface MapIteratee<T, R> {
 }
 
 export interface ReadonlyDataset<Q extends Quad = Quad> extends Iterable<Q> {
-
+  // Enforce the signature
+  [Symbol.asyncIterator]?(): AsyncIterable<ReadonlyDatasetChange<Q>>
 }
 
 export interface ReadonlyDataset<Q extends Quad = Quad> {

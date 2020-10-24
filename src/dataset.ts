@@ -2,16 +2,14 @@ import {
   Quad,
   QuadLike
 } from "@opennetwork/rdf-data-model"
-import {FilterIterateeFn, ReadonlyDataset} from "./readonly-dataset"
+import {ReadonlyDataset} from "./readonly-dataset"
 import { QuadFind } from "./match"
-import {MutateDataset} from "./mutate-dataset";
-import {mutateArray} from "./mutate-array";
+import {MutateDataset} from "./mutate-dataset"
+import {mutateArray} from "./mutate-array"
+import {DatasetOptions} from "./dataset-options"
+import {PartitionFilterFn} from "./partition-filter"
 
 export interface Dataset extends ReadonlyDataset<Quad> {
-
-}
-
-export interface PartitionFilterFn extends FilterIterateeFn<Quad | QuadLike | QuadFind> {
 
 }
 
@@ -22,10 +20,6 @@ export interface Dataset {
   delete(quad: Quad | QuadFind): Dataset
   partition(match: PartitionFilterFn): Dataset
   unpartition(match: PartitionFilterFn): void
-}
-
-export interface DatasetOptions {
-  match?: PartitionFilterFn
 }
 
 function matchPartition(input: Iterable<Quad>, options: DatasetOptions): Iterable<Quad> {
@@ -43,10 +37,14 @@ export class Dataset extends ReadonlyDataset {
 
   readonly #options: Readonly<DatasetOptions>
 
-  constructor(mutate: MutateDataset = mutateArray(), options: DatasetOptions = {}) {
-    super(matchPartition(mutate, options))
-    this.#mutate = mutate
+  constructor(options: DatasetOptions = { mutate: mutateArray() }) {
+    super(matchPartition(options.mutate, options))
+    this.#mutate = options.mutate
     this.#options = Object.freeze(options)
+
+    if (options.watch) {
+      this[Symbol.asyncIterator] = options.watch[Symbol.asyncIterator].bind(options.watch)
+    }
   }
 
   has(match: Quad | QuadFind): boolean {
@@ -77,6 +75,7 @@ export class Dataset extends ReadonlyDataset {
       partition.add(quad)
     } else {
       this.#mutate.add(quad)
+      this.#options.watch?.add(quad)
     }
 
     return this
@@ -90,6 +89,7 @@ export class Dataset extends ReadonlyDataset {
       }
     } else {
       this.#mutate.addAll(dataset)
+      this.#options.watch?.addAll(dataset)
     }
     return this
   }
@@ -124,8 +124,8 @@ export class Dataset extends ReadonlyDataset {
         }
         partition.delete(matched)
       }
-
-      this.#mutate.delete(quad)
+      this.#mutate.delete(matched)
+      this.#options.watch?.delete(matched)
     }
     return this
   }
@@ -164,8 +164,10 @@ export class Dataset extends ReadonlyDataset {
     for (const matched of partitionMutate) {
       this.#mutate.delete(matched)
     }
-    const partitionSet = new Dataset(partitionMutate, {
-      match
+    const partitionSet = new Dataset({
+      mutate: partitionMutate,
+      match,
+      watch: this.#options.watch?.partition(match) || this.#options.watch
     })
     this.#partitions.push([match, partitionSet])
     return partitionSet

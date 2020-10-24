@@ -30,7 +30,7 @@
     "esm": "^3.2.25",
     "filehound": "^1.17.4",
     "tslint": "^6.1.2",
-    "typescript": "^3.9.2",
+    "typescript": "^4.0.2",
     "yjs": "^13.0.8"
   }
 }

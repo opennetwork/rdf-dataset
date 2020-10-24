@@ -10,14 +10,20 @@ export interface ArrayLike<T> extends Iterable<T> {
 }
 
 export function mutateArray(source: ArrayLike<Iterable<Quad>> = []): MutateDataset {
+  let working: Quad[] | undefined = undefined
   return {
     construct(source: Iterable<Quad>): MutateDataset {
       return mutateArray([source])
     },
     add(value: Quad) {
+      if (!working) {
+        working = []
+        source.push(working)
+      }
       source.push([value])
     },
     addAll(values: Iterable<Quad>) {
+      working = undefined
       source.push(values)
     },
     async import(dataset: AsyncIterable<Quad>, eager?: boolean) {
@@ -34,6 +40,7 @@ export function mutateArray(source: ArrayLike<Iterable<Quad>> = []): MutateDatas
       }
     },
     delete(match: Quad | QuadLike | QuadFind) {
+      working = undefined
       for (let index = 0; index < source.length; index += 1) {
         const part = source[index]
         const matched = new ReadonlyDataset(part).without(match)
