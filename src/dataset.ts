@@ -1,4 +1,5 @@
 import {
+  isQuad,
   Quad,
   QuadLike
 } from "@opennetwork/rdf-data-model"
@@ -56,7 +57,7 @@ export class Dataset extends ReadonlyDataset {
 
   has(match: Quad | QuadFind): boolean {
 
-    if (this.#mutate.has) {
+    if (this.#mutate.has && isQuad(match)) {
       return this.#mutate.has(match)
     }
 

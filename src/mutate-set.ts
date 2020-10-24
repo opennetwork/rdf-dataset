@@ -1,15 +1,14 @@
-import {Quad, QuadLike} from "@opennetwork/rdf-data-model"
-import {QuadFind} from "./match"
-import {ReadonlyDataset} from "./readonly-dataset"
+import {Quad} from "@opennetwork/rdf-data-model"
 import {MutateDataset} from "./mutate-dataset"
 
 export interface SetLike<T> extends Iterable<T> {
   add(value: T): void
   delete(value: T): void
+  has?(value: T): void
 }
 
 export function mutateSet(source: SetLike<Quad> = new Set()): MutateDataset {
-  return {
+  const mutate: MutateDataset = {
     construct(source: Iterable<Quad>): MutateDataset {
       return mutateSet(new Set(source))
     },
@@ -34,13 +33,17 @@ export function mutateSet(source: SetLike<Quad> = new Set()): MutateDataset {
         this.addAll(values)
       }
     },
-    delete(match: Quad | QuadLike | QuadFind) {
-      for (const quad of new ReadonlyDataset(source).match(match)) {
-        source.delete(quad)
-      }
+    delete(quad: Quad) {
+      source.delete(quad)
     },
     *[Symbol.iterator]() {
       yield* source
     }
   }
+
+  if (source.has) {
+    mutate.has = source.has.bind(source)
+  }
+
+  return mutate
 }

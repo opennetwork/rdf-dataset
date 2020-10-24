@@ -39,7 +39,7 @@ export function mutateArray(source: ArrayLike<Iterable<Quad>> = []): MutateDatas
         this.addAll(values)
       }
     },
-    delete(match: Quad | QuadLike | QuadFind) {
+    delete(match: Quad) {
       working = undefined
       for (let index = 0; index < source.length; index += 1) {
         const part = source[index]
