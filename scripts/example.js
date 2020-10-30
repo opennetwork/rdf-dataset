@@ -1,5 +1,6 @@
-import { Dataset } from "../esnext/index.js"
+import { Dataset, ReadonlyDataset } from "../esnext/index.js"
 import { DefaultDataFactory} from "@opennetwork/rdf-data-model"
+import canonize from "rdf-canonize"
 
 const dataset = new Dataset()
 
@@ -37,5 +38,12 @@ dataset.add(DefaultDataFactory.fromQuad({
   object: DefaultDataFactory.literal(`"C"@en`)
 }))
 
+dataset.add(DefaultDataFactory.fromQuad({
+  ...aNameMatch,
+  subject: DefaultDataFactory.blankNode('c'),
+  object: DefaultDataFactory.literal(`"D"@en`)
+}))
+
 console.log({ a: aMatcher.size, total: dataset.size })
 console.log({ aObjects: aMatcher.toArray().map(({ object }) => object) })
+console.log({ a: canonize.canonize(aMatcher.toArray(), { algorithm: "URDNA2015" }) })
