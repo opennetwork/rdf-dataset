@@ -1,7 +1,7 @@
-import {Quad, QuadLike} from "@opennetwork/rdf-data-model"
-import {QuadFind} from "./match"
-import {ReadonlyDataset} from "./readonly-dataset"
+import {Quad} from "@opennetwork/rdf-data-model"
+import {isMatch, QuadFind, withoutMatched} from "./match"
 import {MutateDataset} from "./mutate-dataset"
+import {ReadonlyDataset} from "./readonly-dataset";
 
 export interface ArrayLike<T> extends Iterable<T> {
   [key: number]: T | undefined
@@ -10,21 +10,30 @@ export interface ArrayLike<T> extends Iterable<T> {
 }
 
 export function mutateArray(source: ArrayLike<Iterable<Quad>> = []): MutateDataset {
-  let working: Quad[] | undefined = undefined
+  let writeForwardWorking: Quad[] | undefined = undefined,
+    deletable: Quad[] | undefined = undefined
   return {
     construct(source: Iterable<Quad>): MutateDataset {
       return mutateArray([source])
     },
     add(value: Quad) {
-      if (!working) {
-        working = []
-        source.push(working)
+      if (deletable) {
+        deletable.push(value)
+      } else  {
+        if (!writeForwardWorking) {
+          writeForwardWorking = []
+          source.push(writeForwardWorking)
+        }
+        source.push([value])
       }
-      source.push([value])
     },
     addAll(values: Iterable<Quad>) {
-      working = undefined
-      source.push(values)
+      if (deletable) {
+        deletable.push(...values)
+      } else {
+        writeForwardWorking = undefined
+        source.push(values)
+      }
     },
     async import(dataset: AsyncIterable<Quad>, eager?: boolean) {
       const values = []
@@ -39,23 +48,36 @@ export function mutateArray(source: ArrayLike<Iterable<Quad>> = []): MutateDatas
         this.addAll(values)
       }
     },
+    deleteMatches(match) {
+      const [deleted] = collect()
+      deletable = [
+        ...new ReadonlyDataset(this).without(match)
+      ]
+      return deleted
+    },
     delete(match: Quad) {
-      working = undefined
-      for (let index = 0; index < source.length; index += 1) {
-        const part = source[index]
-        const matched = new ReadonlyDataset(part).without(match)
-        // This will go through the entire part to ensure it doesn't include
-        // this matcher, if there is at least one value, we will start again and turn the matched into an array
-        // which will set the change "in stone"
-        if (!matched.empty) {
-          source[index] = matched.toArray()
-        }
-      }
+      const [deleted, doCollection] = collect()
+      deletable = [
+        ...withoutMatched(this, match, false, doCollection)
+      ]
+      return deleted
     },
     *[Symbol.iterator]() {
-      for (const part of source) {
-        yield* part
+      if (deletable) {
+        yield* deletable
+      } else {
+        for (const part of source) {
+          yield* part
+        }
       }
     }
+  }
+
+  function collect(): [Quad[], (quad: Quad) => void] {
+    const collected: Quad[] = []
+    function doCollection(quad: Quad) {
+      collected.push(quad)
+    }
+    return [collected, doCollection]
   }
 }

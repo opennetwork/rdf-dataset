@@ -1,12 +1,13 @@
 import {ReadonlyDataset, ReadonlyDatasetChange} from "./readonly-dataset"
 import {Quad} from "@opennetwork/rdf-data-model"
 import {PartitionFilterFn} from "./partition-filter"
-import {Collector, CollectorOptions} from "./collector";
+import {Collector as CollectorImpl} from "microtask-collector";
 
 export interface DatasetWatcher extends AsyncIterable<ReadonlyDatasetChange> {
   add(quad: Quad): void
   addAll(quads: Iterable<Quad>): void
   delete(quad: Quad): void
+  deleteAll(quad: Iterable<Quad>): void
   partition?(match: PartitionFilterFn): DatasetWatcher
   unpartition?(match: PartitionFilterFn): void
   close?(): void
@@ -18,7 +19,7 @@ interface ChangeEvent {
   quads?: Iterable<Quad>
 }
 
-function mapChanges(events: Iterable<ChangeEvent>): ReadonlyDatasetChange {
+export function mapReadonlyDatasetChange(events: Iterable<ChangeEvent>, meta: unknown = undefined): ReadonlyDatasetChange {
   return [
     new ReadonlyDataset({
       [Symbol.iterator]: adds
@@ -26,7 +27,7 @@ function mapChanges(events: Iterable<ChangeEvent>): ReadonlyDatasetChange {
     new ReadonlyDataset({
       [Symbol.iterator]: deletes
     }),
-    undefined
+    meta
   ]
 
   function *adds() {
@@ -54,16 +55,21 @@ function mapChanges(events: Iterable<ChangeEvent>): ReadonlyDatasetChange {
   }
 }
 
+export interface Collector extends AsyncIterable<ChangeEvent[]> {
+  add(value: ChangeEvent): void;
+  close?(): void;
+}
+
+export interface DatasetWatcherOptions {
+  collector?: Collector;
+}
+
 export class DatasetWatcher implements DatasetWatcher {
 
-  readonly #collector: Collector<ChangeEvent, ReadonlyDatasetChange>
+  readonly #collector: Collector
 
-  constructor(options: Partial<CollectorOptions<ChangeEvent, ReadonlyDatasetChange>>) {
-    this.#collector = new Collector({
-      map: mapChanges,
-      ...options
-    })
-    this[Symbol.asyncIterator] = this.#collector[Symbol.asyncIterator].bind(this.#collector)
+  constructor(options: DatasetWatcherOptions = {}) {
+    this.#collector = options.collector || new CollectorImpl();
   }
 
   add(quad: Quad) {
@@ -87,7 +93,20 @@ export class DatasetWatcher implements DatasetWatcher {
     })
   }
 
+  deleteAll(quads: Iterable<Quad>) {
+    this.#collector.add({
+      type: "delete",
+      quads
+    })
+  }
+
   close?() {
-    this.#collector.close()
+    return this.#collector.close?.();
+  }
+
+  async *[Symbol.asyncIterator]() {
+    for await (const set of this.#collector) {
+      yield mapReadonlyDatasetChange(set);
+    }
   }
 }

@@ -25,9 +25,10 @@ export interface ReadonlyDataset<Q extends Quad = Quad> extends Iterable<Q> {
 }
 
 export interface ReadonlyDataset<Q extends Quad = Quad> {
-  filter<R extends Q = Q>(iteratee: FilterIterateeIsFn<Q, R>): ReadonlyDataset<R>
-  filter(iteratee: FilterIterateeFn<Q>): ReadonlyDataset<Q>
-  except(iteratee: FilterIterateeFn<Q>): ReadonlyDataset<Q>
+  filter<R extends Q = Q>(iteratee: FilterIterateeIsFn<Q, R>, elseFn?: RunIteratee<Q>): ReadonlyDataset<R>
+  filter(iteratee: FilterIterateeFn<Q>, elseFn?: RunIteratee<Q>): ReadonlyDataset<Q>
+  except<I extends Q = Q>(iteratee: FilterIterateeIsFn<Q, I>, elseFn?: RunIteratee<Q>): ReadonlyDataset<Q>
+  except(iteratee: FilterIterateeFn<Q>, elseFn?: RunIteratee<Q>): ReadonlyDataset<Q>
   match(find: Quad | QuadFind): ReadonlyDataset<Q>
   match<R extends Q = Q>(find: R): ReadonlyDataset<R>
   match<R extends Partial<Q> = Q>(find: R): ReadonlyDataset<Q & R>
@@ -63,9 +64,9 @@ export class ReadonlyDataset<Q extends Quad = Quad> implements ReadonlyDataset<Q
     this.#source = source
   }
 
-  filter<R extends Q = Q>(iteratee: FilterIterateeIsFn<Q, R>): ReadonlyDataset<R>
-  filter(iteratee: FilterIterateeFn<Q>): ReadonlyDataset<Q>
-  filter(iteratee: FilterIterateeFn<Q>): ReadonlyDataset<Q> {
+  filter<R extends Q = Q>(iteratee: FilterIterateeIsFn<Q, R>, elseFn?: RunIteratee<Q>): ReadonlyDataset<R>
+  filter(iteratee: FilterIterateeFn<Q>, elseFn?: RunIteratee<Q>): ReadonlyDataset<Q>
+  filter(iteratee: FilterIterateeFn<Q>, elseFn?: RunIteratee<Q>): ReadonlyDataset<Q> {
     return new ReadonlyDataset({
       [Symbol.iterator]: filter.bind(this)
     })
@@ -73,12 +74,16 @@ export class ReadonlyDataset<Q extends Quad = Quad> implements ReadonlyDataset<Q
       for (const value of this) {
         if (iteratee(value)) {
           yield value
+        } else if (elseFn) {
+          elseFn(value);
         }
       }
     }
   }
 
-  except(iteratee: FilterIterateeFn<Q>): ReadonlyDataset<Q> {
+  except<I extends Q = Q>(iteratee: FilterIterateeIsFn<Q, I>, elseFn?: RunIteratee<Q>): ReadonlyDataset<Q>
+  except(iteratee: FilterIterateeFn<Q>, elseFn?: RunIteratee<Q>): ReadonlyDataset<Q>
+  except(iteratee: FilterIterateeFn<Q>, elseFn?: RunIteratee<Q>): ReadonlyDataset<Q> {
     return new ReadonlyDataset({
       [Symbol.iterator]: except.bind(this)
     })
@@ -86,6 +91,8 @@ export class ReadonlyDataset<Q extends Quad = Quad> implements ReadonlyDataset<Q
       for (const value of this) {
         if (!iteratee(value)) {
           yield value
+        } else if (elseFn) {
+          elseFn(value);
         }
       }
     }

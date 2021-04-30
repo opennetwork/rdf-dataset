@@ -1,8 +1,20 @@
-import { Dataset, ReadonlyDataset } from "../esnext/index.js"
+import { Dataset, ReadonlyDataset, DatasetWatcher, mutateArray } from "../esnext/index.js"
 import { DefaultDataFactory} from "@opennetwork/rdf-data-model"
 import canonize from "rdf-canonize"
 
-const dataset = new Dataset()
+const watch = new DatasetWatcher({})
+
+async function subscribe() {
+  for await (const [writes, deletes] of watch) {
+    console.log([...writes], [...deletes])
+  }
+}
+
+const subscription = subscribe()
+const dataset = new Dataset({
+  watch,
+  mutate: mutateArray()
+})
 
 const aNameMatch = {
   subject: DefaultDataFactory.blankNode("a"),
@@ -46,4 +58,13 @@ dataset.add(DefaultDataFactory.fromQuad({
 
 console.log({ a: aMatcher.size, total: dataset.size })
 console.log({ aObjects: aMatcher.toArray().map(({ object }) => object) })
-console.log({ a: canonize.canonize(aMatcher.toArray(), { algorithm: "URDNA2015" }) })
+console.log({ a: await canonize.canonize(aMatcher.toArray().map(cloneQuad), { algorithm: "URDNA2015" }) })
+
+watch.close()
+await subscription
+
+function cloneQuad(quad) {
+  return DefaultDataFactory.fromQuad(JSON.parse(JSON.stringify(quad)))
+}
+
+console.log("done")

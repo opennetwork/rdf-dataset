@@ -122,6 +122,7 @@ export class Dataset extends ReadonlyDataset {
   }
 
   delete(quad: Quad | QuadLike | QuadFind): Dataset {
+
     // Deletes saturate the partitions for instances of the quad, even though only a single partition should contain
     // the quad...
     const basePartitions = new Set(this.matchPartitions(quad))
@@ -129,18 +130,38 @@ export class Dataset extends ReadonlyDataset {
       // If this deletes all instances of the quad, the following match will not iterate
       partition.delete(quad)
     }
-    // Partition deletes will directly use `this.match`, which
-    for (const matched of this.match(quad)) {
-      for (const partition of this.matchPartitions(matched)) {
-        // If we deleted it earlier, we don't need to delete it again from that partition
-        if (basePartitions.has(partition)) {
-          continue
-        }
-        partition.delete(matched)
+
+    const deletedAll = (iterable: Iterable<Quad>) => {
+      const watch = this.#options.watch
+      if (watch.deleteAll) {
+        watch.deleteAll(iterable)
+      } else if (watch.delete) {
+        (Array.isArray(iterable) ? iterable : [...iterable]).forEach(watch.delete)
       }
-      this.#mutate.delete(matched)
-      this.#options.watch?.delete(matched)
     }
+
+    if (this.#mutate.deleteMatches) {
+      deletedAll(this.#mutate.deleteMatches(quad))
+    } else if (!isQuad(quad)) {
+      // Partition deletes will directly use `this.match`, which
+      for (const matched of this.match(quad)) {
+        // If the quad is a matching quad rather than a full quad then see if we have to delete again
+        // just in case these partitions only match on full quads only
+        if (!isQuad(quad)) {
+          for (const partition of this.matchPartitions(matched)) {
+            // If we deleted it earlier, we don't need to delete it again from that partition
+            if (basePartitions.has(partition)) {
+              continue
+            }
+            partition.delete(matched)
+          }
+        }
+        if (!this.#mutate.deleteMatches) {
+          deletedAll(this.#mutate.delete(matched))
+        }
+      }
+    }
+
     return this
   }
 

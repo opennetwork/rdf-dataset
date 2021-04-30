@@ -1,4 +1,4 @@
-import { QuadLike, TermLike, DefaultDataFactory, isQuad, isQuadLike, isTermLike } from "@opennetwork/rdf-data-model"
+import {QuadLike, TermLike, DefaultDataFactory, isQuad, isQuadLike, isTermLike, Quad} from "@opennetwork/rdf-data-model"
 
 function hasKey<V = unknown, K extends (string | symbol | number) = any>(value: V, key: K): value is V & object & Record<K, unknown> {
   return (
@@ -69,4 +69,27 @@ export interface Matcher {
 
 export function matcher(find: QuadFind): Matcher {
   return quad => isMatch(quad, find)
+}
+
+
+
+export function *withoutMatched(input: Iterable<Quad>, match: Quad | QuadFind, shouldMatchMulti: boolean = false, onDeleted?: (quad: Quad) => void) {
+  let matchFn = (quad: Quad) => isMatch(quad, match)
+  const iterator = input[Symbol.iterator]()
+  let result: IteratorResult<Quad>
+  do {
+    result = iterator.next()
+    if (result.value) {
+      if (matchFn && matchFn(result.value)) {
+        if (!shouldMatchMulti) {
+          matchFn = undefined
+        }
+        if (onDeleted) {
+          onDeleted(result.value)
+        }
+      } else {
+        yield result.value
+      }
+    }
+  } while(!result.done)
 }

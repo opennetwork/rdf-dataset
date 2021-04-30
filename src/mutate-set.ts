@@ -1,9 +1,10 @@
 import {Quad} from "@opennetwork/rdf-data-model"
 import {MutateDataset} from "./mutate-dataset"
+import {withoutMatched} from "./match";
 
 export interface SetLike<T> extends Iterable<T> {
   add(value: T): void
-  delete(value: T): void
+  delete(value: T): boolean
   has?(value: T): void
 }
 
@@ -33,12 +34,41 @@ export function mutateSet(source: SetLike<Quad> = new Set()): MutateDataset {
         this.addAll(values)
       }
     },
+    deleteMatches(match) {
+      const [deleted, doCollection] = collect()
+      drain(withoutMatched(this, match, true, doCollection));
+      this.deleteAll(deleted);
+      return deleted
+    },
+    deleteAll(values: Iterable<Quad>): Iterable<Quad> {
+      const had = new Set<Quad>()
+      for (const value of values) {
+        const deleted = source.delete(value)
+        if (deleted) {
+          had.add(value)
+        }
+      }
+      return had
+    },
     delete(quad: Quad) {
-      source.delete(quad)
+      const deleted = source.delete(quad)
+      return deleted ? [quad] : []
     },
     *[Symbol.iterator]() {
       yield* source
     }
+  }
+
+  function drain(iterable: Iterable<unknown>) {
+    for (const value of iterable);
+  }
+
+  function collect(): [Quad[], (quad: Quad) => void] {
+    const collected: Quad[] = []
+    function doCollection(quad: Quad) {
+      collected.push(quad)
+    }
+    return [collected, doCollection]
   }
 
   if (source.has) {

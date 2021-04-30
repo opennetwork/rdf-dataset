@@ -16,16 +16,18 @@
     "example": "node scripts/example.node.js"
   },
   "peerDependencies": {
+    "microtask-collector": "^3.1.0",
     "@opennetwork/rdf-data-model": "^4.0.0"
   },
   "dependencies": {
-    "promise.defer": "^2.0.0"
+
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/opennetwork/rdf-dataset.git"
   },
   "devDependencies": {
+    "microtask-collector": "^3.1.0",
     "@opennetwork/environment": "^1.0.2",
     "@opennetwork/rdf-data-model": "^5.3.1",
     "@types/node": "^14.0.1",
