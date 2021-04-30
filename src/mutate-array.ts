@@ -1,7 +1,6 @@
 import {Quad} from "@opennetwork/rdf-data-model"
-import {isMatch, QuadFind, withoutMatched} from "./match"
+import {withoutMatched} from "./match"
 import {MutateDataset} from "./mutate-dataset"
-import {ReadonlyDataset} from "./readonly-dataset";
 
 export interface ArrayLike<T> extends Iterable<T> {
   [key: number]: T | undefined
@@ -49,9 +48,9 @@ export function mutateArray(source: ArrayLike<Iterable<Quad>> = []): MutateDatas
       }
     },
     deleteMatches(match) {
-      const [deleted] = collect()
+      const [deleted, doCollection] = collect()
       deletable = [
-        ...new ReadonlyDataset(this).without(match)
+        ...withoutMatched(this, match, true, doCollection)
       ]
       return deleted
     },

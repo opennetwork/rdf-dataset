@@ -131,33 +131,28 @@ export class Dataset extends ReadonlyDataset {
       partition.delete(quad)
     }
 
-    const deletedAll = (iterable: Iterable<Quad>) => {
+    const deletedAll = (iterable: Quad[]) => {
       const watch = this.#options.watch
       if (watch.deleteAll) {
-        watch.deleteAll(iterable)
+        watch.deleteAll(iterable);
       } else if (watch.delete) {
-        (Array.isArray(iterable) ? iterable : [...iterable]).forEach(watch.delete)
+        iterable.forEach(watch.delete);
       }
     }
 
     if (this.#mutate.deleteMatches) {
       deletedAll(this.#mutate.deleteMatches(quad))
-    } else if (!isQuad(quad)) {
-      // Partition deletes will directly use `this.match`, which
+    } else {
+      // Partition deletes will directly use `this.match` which will return each the original
+      // instances that match
       for (const matched of this.match(quad)) {
-        // If the quad is a matching quad rather than a full quad then see if we have to delete again
-        // just in case these partitions only match on full quads only
-        if (!isQuad(quad)) {
-          for (const partition of this.matchPartitions(matched)) {
-            // If we deleted it earlier, we don't need to delete it again from that partition
-            if (basePartitions.has(partition)) {
-              continue
-            }
-            partition.delete(matched)
+        deletedAll(this.#mutate.delete(matched))
+        for (const partition of this.matchPartitions(matched)) {
+          // If we deleted it earlier, we don't need to delete it again from that partition
+          if (basePartitions.has(partition)) {
+            continue
           }
-        }
-        if (!this.#mutate.deleteMatches) {
-          deletedAll(this.#mutate.delete(matched))
+          partition.delete(matched)
         }
       }
     }
